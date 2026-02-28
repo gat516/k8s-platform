@@ -1,0 +1,44 @@
+{
+  "name": "kube-platform",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "version": "latest",
+      "helm": "latest",
+      "minikube": "none"
+    },
+    "ghcr.io/devcontainers/features/terraform:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true
+    }
+  },
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "ms-vscode.vscode-docker",
+        "hashicorp.terraform",
+        "redhat.vscode-yaml",
+        "GitHub.copilot"
+      ]
+    }
+  },
+  "postCreateCommand": "kubectl version --client && helm version && terraform version",
+  "remoteUser": "vscode",
+  "forwardPorts": [3000, 8080, 9090, 3001],
+  "portsAttributes": {
+    "3000": {"label": "App"},
+    "8080": {"label": "K8s Dashboard"},
+    "9090": {"label": "Prometheus"},
+    "3001": {"label": "Grafana"}
+  }
+}
