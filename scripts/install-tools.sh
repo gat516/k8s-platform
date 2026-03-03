@@ -33,6 +33,26 @@ install_helm() {
     echo "✅ helm installed"
 }
 
+install_go() {
+    if command -v go &> /dev/null; then
+        echo "✅ go already installed ($(go version))"
+        return
+    fi
+
+    echo "📦 Installing Go..."
+    GO_VERSION=$(curl -fsSL "https://go.dev/dl/?mode=json" | python3 -c "import sys,json; print(json.load(sys.stdin)[0]['version'])")
+    curl -fsSL "https://go.dev/dl/${GO_VERSION}.linux-amd64.tar.gz" -o /tmp/go.tar.gz
+    sudo rm -rf /usr/local/go
+    sudo tar -C /usr/local -xzf /tmp/go.tar.gz
+    rm /tmp/go.tar.gz
+
+    if ! grep -q '/usr/local/go/bin' ~/.bashrc; then
+        echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+    fi
+    export PATH=$PATH:/usr/local/go/bin
+    echo "✅ go installed (${GO_VERSION})"
+}
+
 install_kubectl() {
     if command -v kubectl &> /dev/null; then
         echo "✅ kubectl already installed"
@@ -54,14 +74,16 @@ add_to_path() {
 }
 
 main() {
+    install_go
     install_kubectl
     install_helm
     install_terraform
     add_to_path
-    
+
     echo ""
-    echo "🎉 User-space tools installed!"
-    echo "📍 Tools installed in: $INSTALL_DIR"
+    echo "🎉 Tools installed!"
+    echo "📍 User-space tools in: $INSTALL_DIR"
+    echo "📍 Go installed in: /usr/local/go"
     echo ""
     echo "Still needed (system-level):"
     echo "  • Docker: sudo dnf install docker"

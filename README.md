@@ -4,17 +4,27 @@ A personal Kubernetes platform built to demonstrate production-style DevOps prac
 
 ## Stack
 
-- Kubernetes (k3s local, EKS production)
-- Terraform
-- GitHub Actions
-- Prometheus + Grafana
-- Postgres (RDS)
-- JavaScript (Netlify/Vercel)
-- AWS
+- **Backend:** Go (API service)
+- **Frontend:** Next.js on Vercel (portfolio + interactive platform)
+- **Container Orchestration:** Kubernetes (k3s local, EKS production)
+- **Infrastructure as Code:** Terraform
+- **CI/CD:** GitHub Actions
+- **Monitoring:** Prometheus + Grafana
+- **Database:** Postgres (RDS)
+- **Auth:** GitHub OAuth
+- **Cloud:** AWS
 
 ## Architecture
 
-Frontend is hosted on Netlify/Vercel. Backend services and infrastructure run on AWS via EKS, with GitHub Actions handling CI/CD and Helm managing deployments. Prometheus and Grafana provide observability.
+**Go API** handles all backend logic — health checks, Prometheus metrics, and Kubernetes operations (deployments, pod status, log streaming). It acts as a secure proxy to the Kubernetes API so no cluster credentials are exposed to the frontend. Deployed as a `ClusterIP` service (internal-only, no public Ingress).
+
+**Next.js frontend** on Vercel serves two modes:
+- **Public portfolio** — server-rendered pages showing live cluster health, deployment history, and architecture. No auth required.
+- **Interactive platform** — authenticated via GitHub OAuth with explicit allowlist authorization. Trigger deployments, view pod logs, scale services, monitor real-time status via SSE.
+
+**Security model:** Next.js server-side code is the sole public gateway to the Go API (Backend for Frontend pattern). Every protected request carries a JWT validated by the Go API. The Go API runs under a least-privilege Kubernetes `ServiceAccount` bound to a namespace-scoped `Role`. GitHub Actions authenticates to AWS via OIDC — no static credentials stored.
+
+**Infrastructure** runs on AWS (EKS in production, k3s locally). GitHub Actions handles CI/CD (test → build → push to GHCR → deploy via Helm). Prometheus and Grafana provide observability (internal-only, auth-gated).
 
 ## Project Structure
 
@@ -28,7 +38,8 @@ kube-platform/
 │   └── overlays/         # Environment-specific overlays
 ├── monitoring/           # Prometheus, Grafana configs
 ├── scripts/              # Setup and utility scripts
-├── src/                  # Demo service source code
+├── src/                  # Go API service
+├── frontend/             # Next.js dashboard (portfolio + platform)
 └── terraform/            # Infrastructure as Code
 ```
 
@@ -98,9 +109,16 @@ Work in progress.
 ## Roadmap
 
 - [ ] Local k3s cluster setup
-- [ ] Demo service with `/health` and `/metrics` endpoints
+- [ ] Go API service with `/health` and `/metrics` endpoints
+- [ ] Unit tests (table-driven, `httptest`)
 - [ ] Dockerfile + GHCR image publishing
-- [ ] Helm chart
-- [ ] GitHub Actions pipeline
-- [ ] Prometheus + Grafana stack
+- [ ] Helm chart with dedicated ServiceAccount + RBAC Role
+- [ ] GitHub Actions pipeline with OIDC auth (test → build → push → deploy)
+- [ ] Prometheus + Grafana stack (internal-only, auth-gated)
+- [ ] Next.js frontend (portfolio + interactive platform)
+- [ ] SSE real-time cluster status
+- [ ] GitHub OAuth + allowlist authorization middleware
+- [ ] JWT validation on all protected Go API endpoints
+- [ ] Input validation middleware (resource name sanitization)
+- [ ] WebSocket log streaming
 - [ ] Live public dashboard

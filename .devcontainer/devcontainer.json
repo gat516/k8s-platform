@@ -9,6 +9,9 @@
       "minikube": "none"
     },
     "ghcr.io/devcontainers/features/terraform:1": {},
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "1.25"
+    },
     "ghcr.io/devcontainers/features/node:1": {
       "version": "20"
     },
@@ -26,18 +29,19 @@
       "extensions": [
         "ms-kubernetes-tools.vscode-kubernetes-tools",
         "ms-vscode.vscode-docker",
+        "golang.go",
         "hashicorp.terraform",
         "redhat.vscode-yaml",
         "GitHub.copilot"
       ]
     }
   },
-  "postCreateCommand": "kubectl version --client && helm version && terraform version",
+  "postCreateCommand": "go version && kubectl version --client && helm version && terraform version",
   "remoteUser": "vscode",
   "forwardPorts": [3000, 8080, 9090, 3001],
   "portsAttributes": {
     "3000": {"label": "App"},
-    "8080": {"label": "K8s Dashboard"},
+    "8080": {"label": "Go API"},
     "9090": {"label": "Prometheus"},
     "3001": {"label": "Grafana"}
   }
