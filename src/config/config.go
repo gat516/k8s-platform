@@ -20,6 +20,10 @@ type Config struct {
 
 	// Environment identifies the deployment context ("local", "production").
 	Environment string
+
+	// Version is the binary version string, injected at build time via -ldflags.
+	// Defaults to "dev" when built without ldflags (local development).
+	Version string
 }
 
 // Load reads configuration from environment variables and returns a validated Config.

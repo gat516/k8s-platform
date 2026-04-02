@@ -1,0 +1,25 @@
+# Only src/ is needed for the Docker build. Everything else is excluded to keep
+# the build context small and avoid leaking infrastructure configs into the image.
+.git
+.devcontainer
+.gitignore
+
+# Infrastructure — never baked into application images
+terraform/
+helm/
+k8s/
+monitoring/
+
+# Scripts — runtime tooling, not needed in the image
+scripts/
+
+# Frontend — built and deployed separately via Vercel
+frontend/
+
+# Documentation
+README.md
+INSTRUCTIONS.md
+
+# Local development artifacts
+*.env
+*.env.*

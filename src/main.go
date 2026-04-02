@@ -10,15 +10,20 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/cjgatchalian/kube-platform/config"
-	"github.com/cjgatchalian/kube-platform/server"
+	"github.com/gat516/kube-platform/config"
+	"github.com/gat516/kube-platform/server"
 )
+
+// version is the binary version string. The default value "dev" is overwritten
+// at build time via -ldflags "-X main.version=<git-sha>" (see Dockerfile).
+var version = "dev"
 
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
+	cfg.Version = version
 
 	srv := server.New(cfg)
 

@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cjgatchalian/kube-platform/config"
+	"github.com/gat516/kube-platform/config"
 )
 
 // Server wraps the HTTP server and its dependencies.
@@ -28,7 +28,7 @@ func New(cfg *config.Config) *Server {
 	s := &Server{cfg: cfg, metrics: m}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/health", handleHealth)
+	mux.HandleFunc("/health", s.handleHealth)
 	mux.Handle("/metrics", metricsHandler())
 
 	s.httpServer = &http.Server{

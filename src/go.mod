@@ -1,4 +1,4 @@
-module github.com/cjgatchalian/kube-platform
+module github.com/gat516/kube-platform
 
 go 1.25.7
 

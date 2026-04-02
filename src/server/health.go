@@ -14,7 +14,7 @@ type healthResponse struct {
 }
 
 // handleHealth responds with the service liveness status.
-func handleHealth(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -26,6 +26,6 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(healthResponse{
 		Status:    "ok",
 		Timestamp: time.Now().UTC().Format(time.RFC3339),
-		Version:   "0.1.0",
+		Version:   s.cfg.Version,
 	})
 }

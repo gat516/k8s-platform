@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/cjgatchalian/kube-platform/config"
+	"github.com/gat516/kube-platform/config"
 )
 
 func newTestServer(t *testing.T) *Server {
@@ -14,6 +14,7 @@ func newTestServer(t *testing.T) *Server {
 		Port:               8080,
 		Environment:        "local",
 		AllowedGitHubUsers: map[string]struct{}{},
+		Version:            "dev",
 	}
 	return New(cfg)
 }
