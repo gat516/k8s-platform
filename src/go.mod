@@ -1,4 +1,4 @@
-module github.com/gat516/kube-platform
+module github.com/gat516/k8s-platform
 
 go 1.25.7
 

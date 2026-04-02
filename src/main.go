@@ -10,8 +10,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gat516/kube-platform/config"
-	"github.com/gat516/kube-platform/server"
+	"github.com/gat516/k8s-platform/config"
+	"github.com/gat516/k8s-platform/server"
 )
 
 // version is the binary version string. The default value "dev" is overwritten

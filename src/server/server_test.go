@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gat516/kube-platform/config"
+	"github.com/gat516/k8s-platform/config"
 )
 
 func newTestServer(t *testing.T) *Server {

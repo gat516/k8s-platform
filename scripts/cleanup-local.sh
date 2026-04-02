@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🧹 Cleaning up local kube-platform development environment..."
+echo "🧹 Cleaning up local k8s-platform development environment..."
 
 confirm() {
     read -p "Are you sure you want to remove the local k3s cluster? [y/N] " -n 1 -r

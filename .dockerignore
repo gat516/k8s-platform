@@ -5,16 +5,12 @@
 .gitignore
 
 # Infrastructure — never baked into application images
-terraform/
-helm/
+helm-charts/
 k8s/
 monitoring/
 
 # Scripts — runtime tooling, not needed in the image
 scripts/
-
-# Frontend — built and deployed separately via Vercel
-frontend/
 
 # Documentation
 README.md

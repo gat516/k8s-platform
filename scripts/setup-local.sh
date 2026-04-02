@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Setting up local kube-platform development environment..."
+echo "🚀 Setting up local k8s-platform development environment..."
 
 if [[ $EUID -eq 0 ]]; then
    echo "❌ This script should not be run as root"
@@ -35,7 +35,7 @@ install_k3s() {
     if [[ "$PLATFORM" == "macos" ]]; then
         echo "💡 On macOS, consider using k3d or Docker Desktop Kubernetes instead"
         echo "   Install k3d: brew install k3d"
-        echo "   Then run: k3d cluster create kube-platform"
+        echo "   Then run: k3d cluster create k8s-platform"
         return 1
     fi
     

@@ -1,6 +1,5 @@
 // Package server provides the HTTP server, routing, and request handlers
-// for the kube-platform API. It is the primary interface between the
-// Next.js frontend and the Kubernetes cluster.
+// for the k8s-platform API.
 package server
 
 import (
@@ -11,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gat516/kube-platform/config"
+	"github.com/gat516/k8s-platform/config"
 )
 
 // Server wraps the HTTP server and its dependencies.

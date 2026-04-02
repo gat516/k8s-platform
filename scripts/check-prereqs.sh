@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🔍 Checking prerequisites for kube-platform..."
+echo "🔍 Checking prerequisites for k8s-platform..."
 
 MISSING_TOOLS=()
 
@@ -25,7 +25,6 @@ check_command "k3s" || echo "   💡 k3s will be installed by the setup script"
 
 echo ""
 echo "Checking optional tools:"
-check_command "terraform" || echo "   💡 Required for AWS deployment"
 check_command "git" || echo "   💡 Required for version control"
 check_command "curl" || echo "   💡 Required for downloads"
 

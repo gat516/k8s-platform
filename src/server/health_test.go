@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gat516/kube-platform/config"
+	"github.com/gat516/k8s-platform/config"
 )
 
 // newHealthServer creates a minimal *Server for testing the health handler.

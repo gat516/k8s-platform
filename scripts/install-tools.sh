@@ -6,20 +6,6 @@ mkdir -p "$INSTALL_DIR"
 
 echo "🔧 Installing tools to $INSTALL_DIR"
 
-install_terraform() {
-    if command -v terraform &> /dev/null; then
-        echo "✅ terraform already installed"
-        return
-    fi
-    
-    echo "📦 Installing terraform..."
-    TF_VERSION="1.8.5"
-    curl -fsSL "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" -o /tmp/terraform.zip
-    cd /tmp && unzip -q terraform.zip && mv terraform "$INSTALL_DIR/"
-    rm /tmp/terraform.zip
-    echo "✅ terraform installed"
-}
-
 install_helm() {
     if command -v helm &> /dev/null; then
         echo "✅ helm already installed"
@@ -77,7 +63,6 @@ main() {
     install_go
     install_kubectl
     install_helm
-    install_terraform
     add_to_path
 
     echo ""

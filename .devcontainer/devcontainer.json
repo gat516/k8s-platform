@@ -1,5 +1,5 @@
 {
-  "name": "kube-platform",
+  "name": "k8s-platform",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "features": {
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
@@ -8,7 +8,6 @@
       "helm": "latest",
       "minikube": "none"
     },
-    "ghcr.io/devcontainers/features/terraform:1": {},
     "ghcr.io/devcontainers/features/go:1": {
       "version": "1.25"
     },
@@ -30,13 +29,12 @@
         "ms-kubernetes-tools.vscode-kubernetes-tools",
         "ms-vscode.vscode-docker",
         "golang.go",
-        "hashicorp.terraform",
         "redhat.vscode-yaml",
         "GitHub.copilot"
       ]
     }
   },
-  "postCreateCommand": "go version && kubectl version --client && helm version && terraform version",
+  "postCreateCommand": "go version && kubectl version --client && helm version",
   "remoteUser": "vscode",
   "forwardPorts": [3000, 8080, 9090, 3001],
   "portsAttributes": {

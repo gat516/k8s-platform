@@ -25,7 +25,7 @@ COPY src/ ./
 RUN CGO_ENABLED=0 GOOS=linux go build \
       -trimpath \
       -ldflags="-s -w -X main.version=${VERSION}" \
-      -o /kube-platform \
+      -o /k8s-platform \
       .
 
 # ─── Stage 2: Runtime ─────────────────────────────────────────────────────────
@@ -35,11 +35,11 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
 FROM gcr.io/distroless/static:nonroot
 
 # Copy only the compiled binary from the builder stage.
-COPY --from=builder /kube-platform /kube-platform
+COPY --from=builder /k8s-platform /k8s-platform
 
 # Run as UID 65534 (nonroot). Never run application containers as root.
 USER 65534:65534
 
 EXPOSE 8080
 
-ENTRYPOINT ["/kube-platform"]
+ENTRYPOINT ["/k8s-platform"]
