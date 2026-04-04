@@ -30,6 +30,28 @@ k3s cluster is live on a DigitalOcean VPS. Currently working on **MVP 1**: first
 
 See `docs/mvp.md` for detailed plans per phase and `docs/architecture.md` for the full system design.
 
+## Setup
+
+### 1. Provision a VPS
+Create a VPS (DigitalOcean or Hetzner, Ubuntu 22.04, 4GB RAM). Add your SSH public key at creation time.
+
+### 2. Install k3s
+```bash
+ssh root@<VPS_IP> 'bash -s' < infrastructure/k3s-setup.sh
+```
+
+### 3. Configure local kubectl access
+```bash
+VPS_IP=<VPS_IP> bash infrastructure/get-kubeconfig.sh
+kubectl --kubeconfig=/home/$(whoami)/.kube/k3s-platform.yaml get nodes
+```
+
+### 4. Add GitHub Actions secret
+Copy the base64 output from step 3 and set it as a repository secret:
+```bash
+gh secret set KUBECONFIG_B64 --body "<base64-output>"
+```
+
 ## Project Structure
 
 ```
