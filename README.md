@@ -15,7 +15,7 @@ A personal Kubernetes platform running portfolio services on a single-node k3s c
 
 ## Status
 
-Early. Currently working on **MVP 1**: get the cluster up and one service running end-to-end.
+k3s cluster is live on a DigitalOcean VPS. Currently working on **MVP 1**: first service deployed end-to-end.
 
 ## Roadmap
 
@@ -30,23 +30,13 @@ Early. Currently working on **MVP 1**: get the cluster up and one service runnin
 
 See `docs/mvp.md` for detailed plans per phase and `docs/architecture.md` for the full system design.
 
-## Local Setup
-
-```bash
-./scripts/check-prereqs.sh
-./scripts/setup-local.sh
-kubectl get nodes
-```
-
-Requires Docker, kubectl, helm, and k3s (the setup script installs k3s on Linux). For macOS, use k3d instead.
-
 ## Project Structure
 
 ```
 k8s-platform/
-├── src/               # Go API service
-├── helm-charts/       # Helm charts (one per service)
-├── .github/workflows/ # CI/CD pipelines
-├── scripts/           # Setup and utility scripts
-└── docs/              # Architecture and MVP planning docs
+├── src/                   # Go API service
+├── manifests/             # Kubernetes Deployment + Service
+├── infrastructure/        # VPS bootstrap and kubeconfig scripts
+├── .github/workflows/     # CI pipeline (test + build + push to GHCR)
+└── docs/                  # Architecture and MVP planning docs
 ```
