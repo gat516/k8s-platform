@@ -14,6 +14,8 @@ secrets/
 kubeconfig
 *.pem
 *.key
+k8s-platform
+k8s-platform.pub
 
 # OS
 .DS_Store
