@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: k8s-platform
+  namespace: default
+spec:
+  entryPoints:
+    - web
+  routes:
+    # Only expose /health publicly; /metrics stays cluster-internal for Prometheus
+    # Replace YOUR_API_DOMAIN with the actual domain (e.g. api.charlesgatchalian.dev)
+    - match: Host(`YOUR_API_DOMAIN`) && PathPrefix(`/health`)
+      kind: Rule
+      services:
+        - name: k8s-platform
+          port: 8080

@@ -24,6 +24,11 @@ type Config struct {
 	// Version is the binary version string, injected at build time via -ldflags.
 	// Defaults to "dev" when built without ldflags (local development).
 	Version string
+
+	// CORSOrigins is the set of allowed CORS origins for browser clients (e.g. the
+	// Vercel dashboard). Populated from CORS_ORIGINS (comma-separated).
+	// Defaults to allowing localhost:3000 for local development.
+	CORSOrigins map[string]bool
 }
 
 // Load reads configuration from environment variables and returns a validated Config.
@@ -39,6 +44,7 @@ func Load() (*Config, error) {
 		Port:               port,
 		AllowedGitHubUsers: parseAllowedUsers(os.Getenv("ALLOWED_GITHUB_USERS")),
 		Environment:        getEnv("ENVIRONMENT", "local"),
+		CORSOrigins:        parseCORSOrigins(getEnv("CORS_ORIGINS", "http://localhost:3000")),
 	}, nil
 }
 
@@ -61,6 +67,17 @@ func parsePort(s string) (int, error) {
 		return 0, fmt.Errorf("%q is not a valid port number", s)
 	}
 	return port, nil
+}
+
+func parseCORSOrigins(raw string) map[string]bool {
+	origins := make(map[string]bool)
+	for _, o := range strings.Split(raw, ",") {
+		o = strings.TrimSpace(o)
+		if o != "" {
+			origins[o] = true
+		}
+	}
+	return origins
 }
 
 func parseAllowedUsers(raw string) map[string]struct{} {

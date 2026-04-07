@@ -32,7 +32,7 @@ func New(cfg *config.Config) *Server {
 
 	s.httpServer = &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.Port),
-		Handler:      s.requestLogger(mux),
+		Handler:      s.requestLogger(s.corsMiddleware(mux)),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  60 * time.Second,
@@ -58,6 +58,18 @@ func (s *Server) Shutdown(ctx context.Context) error {
 // in tests via httptest without starting a real TCP listener.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.httpServer.Handler.ServeHTTP(w, r)
+}
+
+// corsMiddleware sets Access-Control-Allow-Origin for allowed browser origins
+// (configured via CORS_ORIGINS env var) so the Vercel dashboard can fetch /health.
+func (s *Server) corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if origin := r.Header.Get("Origin"); s.cfg.CORSOrigins[origin] {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Methods", "GET")
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 // requestLogger wraps a handler and emits a structured log line for every request,
