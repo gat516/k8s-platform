@@ -20,6 +20,8 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    outputs:
+      sha_short: ${{ steps.vars.outputs.sha_short }}
     permissions:
       contents: read
       packages: write
@@ -41,3 +43,33 @@ jobs:
           push: true
           tags: ghcr.io/gat516/k8s-platform:${{ steps.vars.outputs.sha_short }}
           build-args: VERSION=${{ steps.vars.outputs.sha_short }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up kubeconfig
+        run: |
+          echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > /tmp/kubeconfig.yaml
+          chmod 600 /tmp/kubeconfig.yaml
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.34.0'
+      - name: Deploy to cluster
+        env:
+          KUBECONFIG: /tmp/kubeconfig.yaml
+        run: |
+          sed "s|ghcr.io/gat516/k8s-platform:SHA|ghcr.io/gat516/k8s-platform:${{ needs.build.outputs.sha_short }}|" manifests/deployment.yaml | kubectl apply -f -
+          kubectl apply -f manifests/service.yaml
+          kubectl rollout status deployment/k8s-platform --timeout=120s
+      - name: Rollback on failure
+        if: failure()
+        env:
+          KUBECONFIG: /tmp/kubeconfig.yaml
+        run: kubectl rollout undo deployment/k8s-platform
+      - name: Cleanup kubeconfig
+        if: always()
+        run: rm -f /tmp/kubeconfig.yaml
