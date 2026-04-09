@@ -29,6 +29,11 @@ type Config struct {
 	// Vercel dashboard). Populated from CORS_ORIGINS (comma-separated).
 	// Defaults to allowing localhost:3000 for local development.
 	CORSOrigins map[string]bool
+
+	// PrometheusURL is the base URL of the in-cluster Prometheus instance used
+	// to query node-level resource metrics. Defaults to the standard
+	// kube-prometheus-stack service address.
+	PrometheusURL string
 }
 
 // Load reads configuration from environment variables and returns a validated Config.
@@ -45,6 +50,7 @@ func Load() (*Config, error) {
 		AllowedGitHubUsers: parseAllowedUsers(os.Getenv("ALLOWED_GITHUB_USERS")),
 		Environment:        getEnv("ENVIRONMENT", "local"),
 		CORSOrigins:        parseCORSOrigins(getEnv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173")),
+		PrometheusURL:      getEnv("PROMETHEUS_URL", "http://prometheus-operated.monitoring.svc.cluster.local:9090"),
 	}, nil
 }
 

@@ -1,0 +1,72 @@
+# kube-prometheus-stack values for a single-node 4GB VPS.
+# Cuts memory usage aggressively while keeping the metrics the dashboard needs:
+#   - node-exporter  (CPU, memory, disk, network)
+#   - prometheus     (query engine)
+#   - grafana        (optional UI)
+# AlertManager is disabled — no on-call infra needed.
+
+alertmanager:
+  enabled: false
+
+# ── Prometheus ────────────────────────────────────────────────────────────────
+prometheus:
+  prometheusSpec:
+    retention: 7d
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    # Single-node: no need to spread replicas.
+    replicas: 1
+    # Scrape everything in the cluster automatically.
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+
+# ── Node Exporter ─────────────────────────────────────────────────────────────
+# Required for the dashboard's CPU / memory / disk / network metrics.
+nodeExporter:
+  enabled: true
+
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 20m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
+
+# ── Kube State Metrics ────────────────────────────────────────────────────────
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 20m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
+
+# ── Grafana ───────────────────────────────────────────────────────────────────
+grafana:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+  persistence:
+    enabled: false
+  # Change this password before deploying.
+  adminPassword: "changeme"
