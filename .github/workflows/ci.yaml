@@ -62,6 +62,7 @@ jobs:
         env:
           KUBECONFIG: /tmp/kubeconfig.yaml
         run: |
+          kubectl apply -f manifests/rbac.yaml
           sed "s|ghcr.io/gat516/k8s-platform:SHA|ghcr.io/gat516/k8s-platform:${{ needs.build.outputs.sha_short }}|" manifests/deployment.yaml | kubectl apply -f -
           kubectl apply -f manifests/service.yaml
           kubectl apply -f manifests/ingressroute.yaml
