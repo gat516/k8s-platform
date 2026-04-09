@@ -1,0 +1,87 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:         #080809;
+  --surface:    #0f0f11;
+  --surface2:   #161619;
+  --surface3:   #1d1d21;
+  --border:     #2a2a30;
+  --border-hi:  #3a3a44;
+  --amber:      #e8a020;
+  --amber-dim:  #7a5210;
+  --amber-glow: rgba(232, 160, 32, 0.12);
+  --cyan:       #00d9b8;
+  --cyan-dim:   #005e50;
+  --cyan-glow:  rgba(0, 217, 184, 0.1);
+  --red:        #ff3b5c;
+  --red-glow:   rgba(255, 59, 92, 0.12);
+  --green:      #39d98a;
+  --text:       #c8c4bc;
+  --text-dim:   #68686f;
+  --text-hi:    #e8e4dc;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  overflow-x: hidden;
+}
+
+/* CRT grain overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.6;
+}
+
+/* Dot grid background */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(232,160,32,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232,160,32,0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(57,217,138,0.4); }
+  50%       { opacity: 0.6; box-shadow: 0 0 0 4px rgba(57,217,138,0); }
+}
+
+@keyframes pulse-cyan {
+  0%,100% { box-shadow: 0 0 0 0 rgba(0,217,184,0.5); }
+  50%     { box-shadow: 0 0 0 5px rgba(0,217,184,0); }
+}
+
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50%     { opacity: 0.2; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scroll-x {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}

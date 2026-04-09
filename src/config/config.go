@@ -44,7 +44,7 @@ func Load() (*Config, error) {
 		Port:               port,
 		AllowedGitHubUsers: parseAllowedUsers(os.Getenv("ALLOWED_GITHUB_USERS")),
 		Environment:        getEnv("ENVIRONMENT", "local"),
-		CORSOrigins:        parseCORSOrigins(getEnv("CORS_ORIGINS", "http://localhost:3000")),
+		CORSOrigins:        parseCORSOrigins(getEnv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173")),
 	}, nil
 }
 

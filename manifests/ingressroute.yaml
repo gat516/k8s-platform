@@ -7,9 +7,14 @@ spec:
   entryPoints:
     - web
   routes:
-    # Only expose /health publicly; /metrics stays cluster-internal for Prometheus
-    # Replace YOUR_API_DOMAIN with the actual domain (e.g. api.charlesgatchalian.dev)
-    - match: Host(`YOUR_API_DOMAIN`) && PathPrefix(`/health`)
+    # Public endpoints — /health for uptime checks, /api/ for the React dashboard.
+    # /metrics stays cluster-internal for Prometheus only.
+    - match: Host(`api.lcpatterns.dev`) && PathPrefix(`/health`)
+      kind: Rule
+      services:
+        - name: k8s-platform
+          port: 8080
+    - match: Host(`api.lcpatterns.dev`) && PathPrefix(`/api/`)
       kind: Rule
       services:
         - name: k8s-platform

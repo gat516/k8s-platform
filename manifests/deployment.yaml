@@ -13,6 +13,7 @@ spec:
       labels:
         app: k8s-platform
     spec:
+      serviceAccountName: k8s-platform
       containers:
         - name: k8s-platform
           # CI overrides this tag with the short git SHA on every deploy
@@ -23,6 +24,8 @@ spec:
           env:
             - name: ENVIRONMENT
               value: production
+            - name: CORS_ORIGINS
+              value: https://lcpatterns.dev,https://www.lcpatterns.dev
           resources:
             requests:
               memory: 32Mi
