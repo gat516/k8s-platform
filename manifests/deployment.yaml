@@ -25,7 +25,7 @@ spec:
             - name: ENVIRONMENT
               value: production
             - name: CORS_ORIGINS
-              value: https://lcpatterns.dev,https://www.lcpatterns.dev
+              value: https://lcpatterns.dev,https://www.lcpatterns.dev,https://dashboard.lcpatterns.dev
           resources:
             requests:
               memory: 32Mi
