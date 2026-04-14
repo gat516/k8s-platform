@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - web
   routes:
-    # Public endpoints — /health for uptime checks, /api/ for the React dashboard.
+    # k8s-platform API — /health for uptime checks, /api/ for the React dashboard.
     # /metrics stays cluster-internal for Prometheus only.
     - match: Host(`api.lcpatterns.dev`) && PathPrefix(`/health`)
       kind: Rule
@@ -19,3 +19,24 @@ spec:
       services:
         - name: k8s-platform
           port: 8080
+
+    # Pattern Trainer backend — strips /trainer prefix before forwarding to FastAPI
+    # Frontend is hosted on Vercel; only the API runs in-cluster.
+    - match: Host(`api.lcpatterns.dev`) && PathPrefix(`/trainer/`)
+      kind: Rule
+      middlewares:
+        - name: strip-trainer-prefix
+      services:
+        - name: pattern-trainer-backend
+          namespace: default
+          port: 8000
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-trainer-prefix
+  namespace: default
+spec:
+  stripPrefix:
+    prefixes:
+      - /trainer

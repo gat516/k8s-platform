@@ -1,0 +1,48 @@
+## Bitnami PostgreSQL — shared cluster database
+## Installed once (not managed by CI):
+##   helm repo add bitnami https://charts.bitnami.com/bitnami && helm repo update
+##   helm install postgresql bitnami/postgresql \
+##     --set auth.password=<trainer-db-pass> \
+##     --set auth.postgresPassword=<superuser-pass> \
+##     -f infrastructure/postgres-values.yaml
+##
+## In-cluster DNS: postgresql.default.svc.cluster.local:5432
+
+auth:
+  database: postgres        # single database; schemas isolate tenants
+  username: trainer         # default app user
+  password: ""              # set via --set auth.password=<secret> at install time
+  postgresPassword: ""      # set via --set auth.postgresPassword=<secret> at install time
+
+primary:
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: ""        # use cluster default (local-path on k3s)
+  initdb:
+    scripts:
+      init-schemas.sql: |
+        CREATE SCHEMA IF NOT EXISTS trainer;
+        CREATE SCHEMA IF NOT EXISTS pipeline;
+        GRANT ALL PRIVILEGES ON SCHEMA trainer TO trainer;
+        GRANT USAGE ON SCHEMA pipeline TO trainer;
+
+readReplicas:
+  replicaCount: 0           # single-node VPS — no replicas needed
+
+metrics:
+  enabled: true             # Prometheus scrapes via ServiceMonitor
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 20m
+    limits:
+      memory: 64Mi
+      cpu: 100m

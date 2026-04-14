@@ -15,8 +15,13 @@
 ### lcpatterns.dev zone (separate domain, separate Cloudflare zone)
 | Type | Name | Content | Proxy |
 |------|------|---------|-------|
-| A | @ | 143.198.54.6 | Proxied (orange cloud) |
-| A | www | 143.198.54.6 | Proxied (orange cloud) |
+| CNAME | @ | cname.vercel-dns.com | Proxied (orange cloud) |
+| CNAME | www | cname.vercel-dns.com | Proxied (orange cloud) |
+| A | api | 143.198.54.6 | Proxied (orange cloud) |
+
+Notes:
+- `@` and `www` point to Vercel — frontend React SPA, same pattern as the k8s-platform dashboard
+- `api` points to the VPS — pattern-trainer FastAPI backend served via Traefik
 
 ## SSL/TLS Settings (apply to each zone)
 - Encryption mode: Flexible (Cloudflare terminates TLS, forwards to VPS on port 80)
