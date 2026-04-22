@@ -6,6 +6,7 @@ metadata:
 spec:
   entryPoints:
     - web
+    - websecure
   routes:
     # k8s-platform API — /health for uptime checks, /api/ for the React dashboard.
     # /metrics stays cluster-internal for Prometheus only.
