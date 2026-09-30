@@ -1,0 +1,134 @@
+name: Parallelism trial (sequential)
+'on':
+  workflow_call: {}
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-go@v5
+      with:
+        go-version-file: src/go.mod
+        cache: false
+    - name: Restore go cache
+      id: go_cache
+      uses: actions/cache@v4
+      with:
+        path: '~/go/pkg/mod
+
+          ~/.cache/go-build'
+        key: parallelism-v1-${{ runner.os }}-${{ runner.arch }}-test-${{ hashFiles('src/go.mod', 'src/go.sum') }}
+    - name: Require warm caches after population run
+      if: ${{ github.run_attempt > 1 && (steps.go_cache.outputs.cache-hit != 'true') }}
+      run: 'echo ''Expected the exact benchmark cache; refusing a mixed-cache measurement'' >&2
+
+        exit 1'
+    - run: cd src && go test ./...
+    - run: python3 -m unittest discover -s scripts -p 'test_*.py'
+    timeout-minutes: 10
+  web:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Restore npm cache
+      id: npm_cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: parallelism-v1-${{ runner.os }}-${{ runner.arch }}-npm22-${{ hashFiles('frontend/dashboard/package-lock.json')
+          }}
+    - name: Require warm caches after population run
+      if: ${{ github.run_attempt > 1 && (steps.npm_cache.outputs.cache-hit != 'true') }}
+      run: 'echo ''Expected the exact benchmark cache; refusing a mixed-cache measurement'' >&2
+
+        exit 1'
+    - run: npm ci && npm run build
+      working-directory: frontend/dashboard
+    timeout-minutes: 10
+    needs:
+    - test
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-go@v5
+      with:
+        go-version-file: src/go.mod
+        cache: false
+    - name: Restore go cache
+      id: go_cache
+      uses: actions/cache@v4
+      with:
+        path: '~/go/pkg/mod
+
+          ~/.cache/go-build'
+        key: parallelism-v1-${{ runner.os }}-${{ runner.arch }}-scan-${{ hashFiles('src/go.mod', 'src/go.sum', 'scripts/ci-tools.versions')
+          }}
+    - name: Cache security scanners
+      id: scanners_cache
+      uses: actions/cache@v4
+      with:
+        path: '~/go/bin/govulncheck
+
+          ~/go/bin/gosec
+
+          '
+        key: parallelism-v1-scanners-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('src/go.mod', 'scripts/ci-tools.versions')
+          }}
+    - name: Require warm caches after population run
+      if: ${{ github.run_attempt > 1 && (steps.go_cache.outputs.cache-hit != 'true' || steps.scanners_cache.outputs.cache-hit
+        != 'true') }}
+      run: 'echo ''Expected the exact benchmark cache; refusing a mixed-cache measurement'' >&2
+
+        exit 1'
+    - name: Install security scanners
+      if: steps.scanners_cache.outputs.cache-hit != 'true'
+      run: 'source scripts/ci-tools.versions
+
+        go install "golang.org/x/vuln/cmd/govulncheck@$GOVULNCHECK_VERSION"
+
+        go install "github.com/securego/gosec/v2/cmd/gosec@$GOSEC_VERSION"
+
+        '
+    - name: govulncheck (known-vulnerable dependencies)
+      run: cd src && govulncheck ./...
+    - name: gosec (static analysis)
+      run: cd src && gosec ./...
+    timeout-minutes: 10
+    needs:
+    - web
+  build:
+    needs:
+    - test
+    - scan
+    - web
+    runs-on: ubuntu-latest
+    outputs:
+      sha_short: ${{ steps.vars.outputs.sha_short }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set short SHA
+      id: vars
+      run: echo "sha_short=parallelism-${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_OUTPUT"
+    - name: Log in to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build and push
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        push: true
+        tags: ghcr.io/gat516/k8s-platform:benchmark-${{ steps.vars.outputs.sha_short }}-sequential
+        build-args: VERSION=${{ steps.vars.outputs.sha_short }}
+    timeout-minutes: 10

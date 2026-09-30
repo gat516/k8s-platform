@@ -1,0 +1,20 @@
+name: CI parallelism benchmark
+'on':
+  push:
+    branches:
+    - codex/ci-parallel-benchmark
+    paths:
+    - .github/workflows/parallel-benchmark.yaml
+    - .github/workflows/parallel-trial.yaml
+    - .github/workflows/sequential-trial.yaml
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: ci-parallelism-benchmark
+  cancel-in-progress: false
+jobs:
+  parallel:
+    uses: ./.github/workflows/parallel-trial.yaml
+  sequential:
+    uses: ./.github/workflows/sequential-trial.yaml
