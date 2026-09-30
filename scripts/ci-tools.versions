@@ -1,0 +1,4 @@
+# Versions used by the September 29 CI baseline. Update deliberately so the
+# scanner binary cache is invalidated along with the tools.
+GOVULNCHECK_VERSION=v1.8.0
+GOSEC_VERSION=v2.29.0

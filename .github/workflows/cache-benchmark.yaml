@@ -1,0 +1,23 @@
+name: CI cache benchmark
+on:
+  push:
+    branches: [codex/ci-cache-benchmark]
+    paths:
+      - .github/workflows/cache-benchmark.yaml
+      - .github/workflows/cache-trial.yaml
+      - scripts/ci-tools.versions
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: ci-cache-benchmark
+  cancel-in-progress: false
+jobs:
+  trial:
+    strategy:
+      fail-fast: false
+      matrix:
+        cache_mode: [baseline, go-cache, full]
+    uses: ./.github/workflows/cache-trial.yaml
+    with:
+      cache_mode: ${{ matrix.cache_mode }}
