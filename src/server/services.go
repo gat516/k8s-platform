@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -11,12 +12,12 @@ import (
 
 // serviceEntry is a single Deployment summary returned by GET /api/v1/services.
 type serviceEntry struct {
-	Name             string `json:"name"`
-	Namespace        string `json:"namespace"`
-	Image            string `json:"image"`
-	ReplicasReady    int32  `json:"replicas_ready"`
-	ReplicasDesired  int32  `json:"replicas_desired"`
-	Status           string `json:"status"`
+	Name            string `json:"name"`
+	Namespace       string `json:"namespace"`
+	Image           string `json:"image"`
+	ReplicasReady   int32  `json:"replicas_ready"`
+	ReplicasDesired int32  `json:"replicas_desired"`
+	Status          string `json:"status"`
 }
 
 // handleServices lists all Deployments across every namespace and returns a
@@ -64,7 +65,9 @@ func (s *Server) handleServices(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(entries)
+	if err := json.NewEncoder(w).Encode(entries); err != nil {
+		log.Printf("services: encode response: %v", err)
+	}
 }
 
 // deploymentStatus returns a human-readable status string consistent with the

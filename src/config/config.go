@@ -3,13 +3,24 @@ package config
 
 import (
 	"fmt"
+	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
 
 // Config holds all runtime configuration for the API server.
 type Config struct {
+	Application       string
+	ActionsRepository string
+	ActionsWorkflow   string
+	ActionsBranch     string
+	ActionsToken      string
+	ServiceHealthURL  string
+	// DashboardStaticDir is the production Vite build directory. Empty leaves
+	// frontend serving to the local Vite development server.
+	DashboardStaticDir string
 	// Port is the TCP port the HTTP server listens on.
 	Port int
 
@@ -25,8 +36,8 @@ type Config struct {
 	// Defaults to "dev" when built without ldflags (local development).
 	Version string
 
-	// CORSOrigins is the set of allowed CORS origins for browser clients (e.g. the
-	// Vercel dashboard). Populated from CORS_ORIGINS (comma-separated).
+	// CORSOrigins is the set of allowed origins for separately hosted browser
+	// clients. Populated from CORS_ORIGINS (comma-separated).
 	// Defaults to allowing localhost:3000 for local development.
 	CORSOrigins map[string]bool
 
@@ -44,8 +55,28 @@ func Load() (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid PORT: %w", err)
 	}
+	repository := getEnv("ACTIONS_REPOSITORY", "gat516/book")
+	if !regexp.MustCompile(`^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$`).MatchString(repository) {
+		return nil, fmt.Errorf("ACTIONS_REPOSITORY must be owner/repository")
+	}
+	workflow := getEnv("ACTIONS_WORKFLOW", "ci.yml")
+	if !regexp.MustCompile(`^[A-Za-z0-9_.-]+$`).MatchString(workflow) {
+		return nil, fmt.Errorf("ACTIONS_WORKFLOW must be a workflow filename or ID")
+	}
+	healthURL := getEnv("SERVICE_HEALTH_URL", "https://qireadr.com/api/healthz")
+	u, err := url.Parse(healthURL)
+	if err != nil || u.Scheme != "https" || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" {
+		return nil, fmt.Errorf("SERVICE_HEALTH_URL must be an HTTPS URL without credentials, query, or fragment")
+	}
 
 	return &Config{
+		Application:        getEnv("APPLICATION_NAME", "qireadr"),
+		ActionsRepository:  repository,
+		ActionsWorkflow:    workflow,
+		ActionsBranch:      getEnv("ACTIONS_BRANCH", "main"),
+		ActionsToken:       os.Getenv("ACTIONS_READ_TOKEN"),
+		ServiceHealthURL:   healthURL,
+		DashboardStaticDir: os.Getenv("DASHBOARD_STATIC_DIR"),
 		Port:               port,
 		AllowedGitHubUsers: parseAllowedUsers(os.Getenv("ALLOWED_GITHUB_USERS")),
 		Environment:        getEnv("ENVIRONMENT", "local"),

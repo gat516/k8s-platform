@@ -1,5 +1,5 @@
 {
-  "name": "k8s-platform-dashboard",
+  "name": "cicd-dashboard",
   "private": true,
   "scripts": {
     "dev": "vite",

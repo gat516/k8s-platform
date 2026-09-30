@@ -1,10 +1,18 @@
-name: CI
+name: CI/CD Dashboard
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+
+permissions:
+  contents: read
+
+# Finish an in-progress release, including recovery, before starting another.
+concurrency:
+  group: cicd-dashboard-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   test:
@@ -15,9 +23,38 @@ jobs:
         with:
           go-version-file: src/go.mod
       - run: cd src && go test ./...
+      - run: python3 -m unittest discover -s scripts -p 'test_*.py'
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/dashboard/package-lock.json
+      - run: npm ci && npm run build
+        working-directory: frontend/dashboard
+
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: src/go.mod
+      - name: govulncheck (known-vulnerable dependencies)
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          cd src && govulncheck ./...
+      - name: gosec (static analysis)
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          cd src && gosec ./...
 
   build:
-    needs: test
+    needs: [test, scan, web]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     outputs:
@@ -47,9 +84,20 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # The retired cluster is gone. Enable only after configuring and testing
+    # replacement credentials/network access; AWS currently uses private SSM access.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DASHBOARD_DEPLOY_ENABLED == 'true'
+    env:
+      # This workflow deploys the dashboard. qireadr keeps its own workflow.
+      DEPLOY_HEALTH_URL: ${{ vars.DEPLOY_HEALTH_URL }}
     steps:
       - uses: actions/checkout@v4
+      - name: Validate deployment target
+        run: |
+          if [ "$DEPLOY_HEALTH_URL" != 'https://status.qireadr.com/health' ]; then
+            echo 'Set DEPLOY_HEALTH_URL=https://status.qireadr.com/health before enabling deployment.' >&2
+            exit 1
+          fi
       - name: Set up kubeconfig
         run: |
           echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > /tmp/kubeconfig.yaml
@@ -58,7 +106,13 @@ jobs:
         uses: azure/setup-kubectl@v4
         with:
           version: 'v1.34.0'
+      - name: Capture previous release
+        id: previous
+        env:
+          KUBECONFIG: /tmp/kubeconfig.yaml
+        run: python3 scripts/release.py capture --health-url "$DEPLOY_HEALTH_URL" >> "$GITHUB_OUTPUT"
       - name: Deploy to cluster
+        id: release
         env:
           KUBECONFIG: /tmp/kubeconfig.yaml
         run: |
@@ -67,11 +121,18 @@ jobs:
           kubectl apply -f manifests/service.yaml
           kubectl apply -f manifests/ingressroute.yaml
           kubectl rollout status deployment/k8s-platform --timeout=120s
-      - name: Rollback on failure
-        if: failure()
+      - name: Verify release
+        id: verify
+        env:
+          EXPECTED_VERSION: ${{ needs.build.outputs.sha_short }}
+        run: python3 scripts/release.py verify --health-url "$DEPLOY_HEALTH_URL" --version "$EXPECTED_VERSION"
+      - name: Restore and verify previous release
+        if: ${{ failure() && steps.previous.outputs.previous_revision != '' && (steps.release.outcome == 'failure' || steps.verify.outcome == 'failure') }}
         env:
           KUBECONFIG: /tmp/kubeconfig.yaml
-        run: kubectl rollout undo deployment/k8s-platform
+          PREVIOUS_REVISION: ${{ steps.previous.outputs.previous_revision }}
+          PREVIOUS_VERSION: ${{ steps.previous.outputs.previous_version }}
+        run: python3 scripts/release.py rollback --health-url "$DEPLOY_HEALTH_URL" --revision "$PREVIOUS_REVISION" --version "$PREVIOUS_VERSION"
       - name: Cleanup kubeconfig
         if: always()
         run: rm -f /tmp/kubeconfig.yaml

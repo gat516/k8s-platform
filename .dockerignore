@@ -1,21 +1,13 @@
-# Only src/ is needed for the Docker build. Everything else is excluded to keep
-# the build context small and avoid leaking infrastructure configs into the image.
-.git
-.devcontainer
-.gitignore
-
-# Infrastructure — never baked into application images
-helm-charts/
-k8s/
-monitoring/
-
-# Scripts — runtime tooling, not needed in the image
-scripts/
-
-# Documentation
-README.md
-INSTRUCTIONS.md
-
-# Local development artifacts
-*.env
-*.env.*
+# Only build inputs enter the context; local keys, env files and modules stay out.
+**
+!Dockerfile
+!src/
+!src/**
+!frontend/
+!frontend/dashboard/
+!frontend/dashboard/package.json
+!frontend/dashboard/package-lock.json
+!frontend/dashboard/index.html
+!frontend/dashboard/vite.config.js
+!frontend/dashboard/src/
+!frontend/dashboard/src/**

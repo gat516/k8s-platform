@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 )
@@ -23,9 +24,11 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	json.NewEncoder(w).Encode(healthResponse{
+	if err := json.NewEncoder(w).Encode(healthResponse{
 		Status:    "ok",
 		Timestamp: time.Now().UTC().Format(time.RFC3339),
 		Version:   s.cfg.Version,
-	})
+	}); err != nil {
+		log.Printf("health: encode response: %v", err)
+	}
 }

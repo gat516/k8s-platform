@@ -1,5 +1,14 @@
 # syntax=docker/dockerfile:1
 
+# Build the dashboard into the same release as its API.
+FROM node:22-alpine AS frontend
+WORKDIR /frontend
+COPY frontend/dashboard/package.json frontend/dashboard/package-lock.json ./
+RUN npm ci
+COPY frontend/dashboard/index.html frontend/dashboard/vite.config.js ./
+COPY frontend/dashboard/src/ ./src/
+RUN npm run build
+
 # ─── Stage 1: Build ───────────────────────────────────────────────────────────
 # Use the official Go image as the build environment. This stage is discarded
 # after compilation — it never appears in the final image.
@@ -36,6 +45,8 @@ FROM gcr.io/distroless/static:nonroot
 
 # Copy only the compiled binary from the builder stage.
 COPY --from=builder /k8s-platform /k8s-platform
+COPY --from=frontend /frontend/dist /dashboard
+ENV DASHBOARD_STATIC_DIR=/dashboard
 
 # Run as UID 65534 (nonroot). Never run application containers as root.
 USER 65534:65534

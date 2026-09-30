@@ -8,11 +8,11 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gat516/k8s-platform/config"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 )
 
 // Server wraps the HTTP server and its dependencies.
@@ -23,6 +23,7 @@ type Server struct {
 	// k8sClient is nil when running outside a cluster; handlers fall back to
 	// mock/empty data in that case.
 	k8sClient *kubernetes.Clientset
+	dashboard *dashboardSource
 }
 
 // New creates a Server configured with the provided Config.
@@ -30,28 +31,19 @@ type Server struct {
 func New(cfg *config.Config) *Server {
 	m := newMetrics()
 	s := &Server{cfg: cfg, metrics: m}
-
-	// Attempt to build an in-cluster Kubernetes client. If this binary is running
-	// outside a cluster (e.g. local dev) the error is logged and k8sClient stays
-	// nil — each handler must tolerate a nil client.
-	k8sCfg, err := rest.InClusterConfig()
-	if err != nil {
-		log.Printf("k8s in-cluster config unavailable (running outside cluster?): %v — API endpoints will return empty/mock data", err)
-	} else {
-		cs, err := kubernetes.NewForConfig(k8sCfg)
-		if err != nil {
-			log.Printf("failed to create k8s client: %v — API endpoints will return empty/mock data", err)
-		} else {
-			s.k8sClient = cs
-		}
-	}
+	// The public dashboard reads one configured workflow and health endpoint.
+	// It requires no Kubernetes credentials or access to customer data.
+	s.dashboard = newDashboardSource(cfg)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", s.handleHealth)
 	mux.Handle("/metrics", metricsHandler())
-	mux.HandleFunc("/api/v1/cluster", s.handleCluster)
-	mux.HandleFunc("/api/v1/services", s.handleServices)
-	mux.HandleFunc("/api/v1/resources", s.handleResources)
+	mux.HandleFunc("/api/v1/dashboard", s.handleDashboard)
+	if cfg.DashboardStaticDir != "" {
+		frontend := dashboardFiles(cfg.DashboardStaticDir)
+		mux.Handle("GET /{$}", frontend)
+		mux.Handle("GET /assets/", frontend)
+	}
 
 	s.httpServer = &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.Port),
@@ -117,8 +109,22 @@ func (s *Server) requestLogger(next http.Handler) http.Handler {
 		s.metrics.httpRequestsTotal.WithLabelValues(r.Method, r.URL.Path, status).Inc()
 		s.metrics.httpRequestDuration.WithLabelValues(r.Method, r.URL.Path).Observe(duration.Seconds())
 
-		log.Printf("%s %s %d %s", r.Method, r.URL.Path, rw.statusCode, duration)
+		// #nosec G706 -- method and path are passed through sanitizeLogValue,
+		// which strips the control characters that make log injection possible.
+		// gosec's taint analysis cannot see through the sanitizer.
+		log.Printf("%s %s %d %s", sanitizeLogValue(r.Method), sanitizeLogValue(r.URL.Path), rw.statusCode, duration)
 	})
+}
+
+// sanitizeLogValue strips control characters from request-controlled strings so
+// a crafted method or path cannot inject newlines and forge log entries.
+func sanitizeLogValue(v string) string {
+	return strings.Map(func(r rune) rune {
+		if r < 0x20 || r == 0x7f {
+			return -1
+		}
+		return r
+	}, v)
 }
 
 // responseWriter wraps http.ResponseWriter to capture the status code written

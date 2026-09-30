@@ -1,36 +1,17 @@
-# Cloudflare DNS Setup
+# Dashboard DNS on qireadr.com
 
-## Domain
-- Domain: charlesgatchalian.dev
-- Nameservers: pointed to Cloudflare
+The dashboard’s hostname is **status.qireadr.com**. The retired VPS and
+its domains are no longer deployment targets.
 
-## DNS Records
+Follow [the dashboard deployment guide](../docs/domain.md) for the current setup:
 
-### charlesgatchalian.dev zone
-| Type | Name | Content | Proxy |
-|------|------|---------|-------|
-| A | api | 143.198.54.6 | Proxied (orange cloud) |
-| A | grafana | 143.198.54.6 | Proxied (orange cloud) |
+- Reuse qireadr’s existing AWS/k3s host; confirm its Elastic IP before changing DNS.
+- Add an **A** record named `status`, pointing to that address.
+- Start **DNS only** while Traefik obtains and verifies the origin certificate.
+- Then enable **Proxied**, retaining **Full (strict)** and the existing ACME path.
+- Preserve the apex record, existing Worker route, and unrelated DNS records.
 
-### lcpatterns.dev zone (separate domain, separate Cloudflare zone)
-| Type | Name | Content | Proxy |
-|------|------|---------|-------|
-| CNAME | @ | cname.vercel-dns.com | Proxied (orange cloud) |
-| CNAME | www | cname.vercel-dns.com | Proxied (orange cloud) |
-| A | api | 143.198.54.6 | Proxied (orange cloud) |
-
-Notes:
-- `@` and `www` point to Vercel — frontend React SPA, same pattern as the k8s-platform dashboard
-- `api` points to the VPS — pattern-trainer FastAPI backend served via Traefik
-
-## SSL/TLS Settings (apply to each zone)
-- Encryption mode: Flexible (Cloudflare terminates TLS, forwards to VPS on port 80)
-- Always Use HTTPS: ON
-- Automatic HTTPS Rewrites: ON
-- Minimum TLS Version: 1.2
-
-## Notes
-- `platform.charlesgatchalian.dev` is hosted on Vercel — Vercel manages its own DNS record, no A record needed here
-- Flexible mode means no cert-manager or Let's Encrypt needed inside the cluster
-- Traffic between Cloudflare and the VPS travels over HTTP on port 80
-- If upgrading to Full (Strict) mode later: install cert-manager and configure Traefik TLS
+The initial deployment and HTTPS were verified on September 29, 2026. The `status`
+record is Proxied and the origin certificate is valid; no DNS change is needed.
+The old `k3s-setup.sh` and `traefik-config.yaml` describe the retired cluster; they
+must not be applied to qireadr’s shared host.

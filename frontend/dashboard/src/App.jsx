@@ -1,78 +1,63 @@
-import { useState, useEffect, useRef } from 'react'
-import { fetchHealth, fetchCluster, fetchServices, fetchResources } from './api.js'
+import { useEffect, useState } from 'react'
+import { fetchDashboard } from './api.js'
 import Header from './components/Header.jsx'
-import ClusterStatus from './components/ClusterStatus.jsx'
-import ResourceGauges from './components/ResourceGauges.jsx'
-import ServicesGrid from './components/ServicesGrid.jsx'
 import Pipeline from './components/Pipeline.jsx'
-import EventTicker from './components/EventTicker.jsx'
+import { duration, timestamp, stageLabel } from './format.js'
 
-const POLL_INTERVAL = 5000
+const stages = [['Checks', 'checks'], ['Build', 'build'], ['Deploy', 'deploy'], ['Verify', 'verify'], ['Rollback', 'rollback']]
 
 export default function App() {
-  const [health, setHealth]       = useState(null)
-  const [cluster, setCluster]     = useState(null)
-  const [services, setServices]   = useState(null)
-  const [resources, setResources] = useState(null)
-
-  // Ref-backed history for sparklines (kept outside React state to avoid re-render
-  // storms; gauge components read it via props on each poll).
-  const cpuHistory  = useRef([])
-  const memHistory  = useRef([])
-  const diskHistory = useRef([])
-
+  const [data, setData] = useState(null)
+  const [error, setError] = useState(false)
+  const [refresh, setRefresh] = useState(0)
+  const [loading, setLoading] = useState(true)
   useEffect(() => {
+    let stopped = false
+    let timer
+    let controller
     const load = async () => {
-      const [h, c, svc, res] = await Promise.allSettled([
-        fetchHealth(),
-        fetchCluster(),
-        fetchServices(),
-        fetchResources(),
-      ])
-
-      if (h.status   === 'fulfilled') setHealth(h.value)
-      if (c.status   === 'fulfilled') setCluster(c.value)
-      if (svc.status === 'fulfilled') setServices(svc.value)
-      if (res.status === 'fulfilled') {
-        const r = res.value
-        setResources(r)
-        // Append to rolling sparkline history (keep last 12 samples).
-        cpuHistory.current  = [...cpuHistory.current,  r.cpu_percent].slice(-12)
-        memHistory.current  = [...memHistory.current,  r.memory_percent].slice(-12)
-        diskHistory.current = [...diskHistory.current, r.disk_io_percent].slice(-12)
+      controller = new AbortController()
+      setLoading(true)
+      try {
+        const result = await fetchDashboard(controller.signal)
+        if (!stopped) { setData(result); setError(false) }
+      } catch (err) {
+        if (!stopped && err.name !== 'AbortError') setError(true)
+      } finally {
+        if (!stopped) { setLoading(false); timer = setTimeout(load, 30000) }
       }
     }
-
     load()
-    const interval = setInterval(load, POLL_INTERVAL)
-    return () => clearInterval(interval)
-  }, [])
+    return () => { stopped = true; clearTimeout(timer); controller?.abort() }
+  }, [refresh])
+
+  const latest = data?.pipeline.runs[0]
+  const stale = error || data?.pipeline.state === 'stale'
+  const health = error ? 'unknown' : data?.service.state ?? 'unknown'
+  const healthLabel = ({ healthy: 'Responding', unhealthy: 'Check failed', unknown: 'Unknown', not_configured: 'Not configured' })[health] ?? 'Unknown'
 
   return (
-    <div style={{ minHeight: '100vh', display: 'grid', gridTemplateRows: 'auto 1fr auto' }}>
-      <Header health={health} />
-
-      <div style={{
-        padding: '0 24px 24px',
-        display: 'grid',
-        gap: '16px',
-        gridTemplateColumns: '1fr 1fr 1fr',
-        gridTemplateRows: 'auto auto auto',
-        alignItems: 'start',
-      }}>
-        <ClusterStatus cluster={cluster} />
-        <ResourceGauges
-          resources={resources}
-          cpuHistory={cpuHistory.current}
-          memHistory={memHistory.current}
-          diskHistory={diskHistory.current}
-          cluster={cluster}
-        />
-        <ServicesGrid services={services} />
-        <Pipeline />
-      </div>
-
-      <EventTicker services={services} cluster={cluster} />
+    <div className="app-shell">
+      <Header application={data?.application ?? 'qireadr'} />
+      <main>
+        <div className="page-heading">
+          <h1>Status</h1>
+          <button className="refresh-button" disabled={loading} onClick={() => setRefresh(v => v + 1)}>{loading ? 'Checking…' : 'Refresh'}</button>
+        </div>
+        {(error || data?.pipeline.message) && <div className="notice" role="status">{error ? 'Status unavailable. Displayed results may be out of date.' : data.pipeline.message}</div>}
+        <section className="service-summary" aria-label="Service health">
+          <div className="service-line"><h2>{data?.application ?? 'qireadr'}</h2><span className={`health health-${health}`} role="status">{!data && loading ? 'Checking…' : healthLabel}</span></div>
+          <dl className="service-details"><div><dt>Checked</dt><dd>{timestamp(data?.service.checked_at)}</dd></div><div><dt>Version</dt><dd><code>{data?.service.version || 'Not reported'}</code></dd></div></dl>
+          {data?.service.message && <p className="detail">{data.service.message}</p>}
+        </section>
+        {latest && <section className="release-panel" aria-labelledby="release-heading">
+          <div className="panel-heading"><h2 id="release-heading">Latest workflow</h2><a className="text-link" href={latest.url} target="_blank" rel="noreferrer">Run #{latest.number} ↗</a></div>
+          <div className="run-summary"><code>{latest.commit.slice(0, 7)}</code><span className={`badge state-${latest.status === 'completed' ? latest.conclusion : latest.status}`}>{stageLabel(latest.status === 'completed' ? latest.conclusion : latest.status)}</span><span className="detail">{duration(latest.duration_seconds)}</span>{stale && <span className="detail">Stale data</span>}</div>
+          <div className="stage-grid">{stages.map(([name, key]) => <div className="stage" key={key}><h3>{name}</h3><span className={`badge state-${latest[key] ?? 'unknown'}`}>{stageLabel(latest[key])}</span></div>)}</div>
+        </section>}
+        <Pipeline runs={data?.pipeline.runs ?? []} loading={!data && loading} stale={stale} unavailable={error || (!!data && data.pipeline.state !== 'available')} />
+        <footer>GitHub updated {timestamp(data?.pipeline.fetched_at)}</footer>
+      </main>
     </div>
   )
 }

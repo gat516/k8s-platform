@@ -1,64 +1,138 @@
-# k8s-platform
+# CI/CD Dashboard
 
-A personal Kubernetes platform running portfolio services on a single-node k3s cluster on a cheap VPS. The point is to demonstrate real DevOps work — automated deployments, Helm packaging, and live observability — not just a static portfolio site.
+A small Go/React dashboard for understanding how one application moves from a
+commit to a running release. The first tracked application is **qireadr**.
 
-## Stack
+The learning goal is simple: **test → build → deploy → verify → recover**.
+GitHub Actions runs the pipeline; this dashboard explains its results.
 
-- **API:** Go
-- **Orchestration:** k3s (single-node, ~512MB overhead)
-- **Ingress:** Traefik (bundled with k3s)
-- **DNS/TLS:** Cloudflare free tier
-- **CI/CD:** GitHub Actions (build → push to GHCR → deploy via Helm)
-- **Monitoring:** Prometheus + Grafana (kube-prometheus-stack)
-- **Databases:** PostgreSQL + Redis (Bitnami Helm charts, PVCs)
-- **Infrastructure:** Hetzner or DigitalOcean VPS (~$6/mo, 4GB RAM)
+## What is implemented
 
-## Status
+- A Go API fetches the latest five push runs of one configured GitHub Actions workflow.
+- A React page shows checks, build, deploy, verification, and rollback outcomes,
+  plus commit IDs, workflow execution times, and links to the actual runs.
+- An independent HTTP probe shows whether the application responds and its version
+  when the health endpoint supplies one. CI success is never treated as evidence
+  that the application was deployed.
+- Results are cached, unavailable sources are labeled, and last successful fetch
+  timestamps remain visible when results become stale.
+- The dashboard's own Actions workflow tests, scans, and builds a combined UI/API image.
+  Deployment is gated until the replacement AWS access is configured.
+  It records the prior deployment revision, verifies the new version over HTTP,
+  and restores **and verifies** the prior revision if deployment or verification fails.
+- The public API returns a fixed set of fields. It does not return commit messages,
+  actor identities, logs, tokens, private health URLs, or cluster inventory.
 
-k3s cluster is live on a DigitalOcean VPS. Currently working on **MVP 1**: first service deployed end-to-end.
+## What is not connected yet
 
-## Roadmap
+The default source is `gat516/book`, workflow `ci.yml`, branch `main`. Confirm that
+these match the GitHub repository you intend to monitor. That workflow currently
+runs checks and builds; it does not deploy qireadr. Deploy/verify/rollback therefore
+show **Not configured**, rather than invented successful releases.
 
-| MVP | Goal | Status |
-|-----|------|--------|
-| 1 | Single-node k3s cluster + one service deployed | in progress |
-| 2 | GitHub Actions CI/CD pipeline | not started |
-| 3 | DNS + TLS + Traefik Ingress | not started |
-| 4 | Helm charts + Prometheus/Grafana | not started |
-| 5 | In-cluster PostgreSQL + Redis with persistent storage | not started |
-| 6 | Multi-service platform (all portfolio projects deployed) | not started |
+qireadr's health endpoint currently need not report a version. Until it does, the
+page says **Not reported**. Do not infer a running version from a Git commit or a
+successful workflow run.
 
-See `docs/mvp.md` for detailed plans per phase and `docs/architecture.md` for the full system design.
+The dashboard is live at **https://status.qireadr.com** on qireadr's existing
+AWS/k3s node, behind Cloudflare. Initial deployment and HTTPS were verified on
+September 29, 2026, using source snapshot `worktree-d0533b2b5190`. GitHub is
+reachable but currently has no matching push runs for the configured source.
+Automatic deployment remains gated until CI access is connected. A controlled
+recovery drill is still needed before claiming measured recovery performance.
 
-## Setup
+## Local development
 
-### 1. Provision a VPS
-Create a VPS (DigitalOcean or Hetzner, Ubuntu 22.04, 4GB RAM). Add your SSH public key at creation time.
+Requirements: Go matching `src/go.mod`, Node 22+, npm, and Python 3 for release tests.
+No Kubernetes cluster, database, or Prometheus installation is needed to run the UI.
 
-### 2. Install k3s
+Terminal 1, from the repository root:
+
 ```bash
-ssh root@<VPS_IP> 'bash -s' < infrastructure/k3s-setup.sh
+cp .env.example .env
+set -a
+. ./.env
+set +a
+cd src
+go run .
 ```
 
-### 3. Configure local kubectl access
+Terminal 2:
+
 ```bash
-VPS_IP=<VPS_IP> bash infrastructure/get-kubeconfig.sh
-kubectl --kubeconfig=/home/$(whoami)/.kube/k3s-platform.yaml get nodes
+cd frontend/dashboard
+npm ci
+npm run dev
 ```
 
-### 4. Add GitHub Actions secret
-Copy the base64 output from step 3 and set it as a repository secret:
+Open the Vite URL. Development `/api/` requests proxy to the local Go API on port
+8080. Production serves the built page and API from one container and origin;
+leave `VITE_API_URL` unset. Docker sets `DASHBOARD_STATIC_DIR=/dashboard`. To test
+the same setup locally, build the frontend and set `DASHBOARD_STATIC_DIR` to the
+absolute path of `frontend/dashboard/dist` when starting Go.
+
+### Data source configuration
+
+| Variable | Purpose | Default |
+| --- | --- | --- |
+| `APPLICATION_NAME` | Display name | `qireadr` |
+| `ACTIONS_REPOSITORY` | Repository to observe | `gat516/book` |
+| `ACTIONS_WORKFLOW` | Workflow filename or numeric ID | `ci.yml` |
+| `ACTIONS_BRANCH` | Branch whose push runs are shown | `main` |
+| `ACTIONS_READ_TOKEN` | Optional server-side token with Actions: read for that repository | unset |
+| `SERVICE_HEALTH_URL` | HTTPS health endpoint | `https://qireadr.com/api/healthz` |
+
+Public repositories can work without a token; GitHub results then refresh every
+ten minutes to limit API use. With a token, they refresh every minute. Service
+checks refresh every 30 seconds while the dashboard is being read. This is an
+on-demand dashboard, not a continuous uptime recorder.
+
+A private repository needs a fine-grained token limited to Actions: read. Supplying
+that token intentionally publishes the selected workflow's sanitized metadata to
+this public dashboard. Do not put it in a `VITE_` variable. In Kubernetes, the
+optional Secret is `cicd-dashboard-github`, key `token`.
+
+The monitored health endpoint must return HTTP 200 and either plain `ok` or JSON
+`{"status":"ok","version":"abc1234"}`. `version` is optional for display, but
+required by the deployment verification script.
+
+## The deliberately small project scope
+
+1. One application and one Actions workflow.
+2. Versioned images, serialized deployments, health/version checks, and recovery
+   to the captured prior revision.
+3. One read-only page with real results and explicit unknown/stale states.
+
+Start with application-only releases whose database schema and external resources
+remain compatible. Kubernetes rollback restores the deployment's pod template;
+it does not restore databases, Secrets, ConfigMaps, or other infrastructure.
+
+See [the architecture](docs/architecture.md) for the data flow and
+[the learning checklist](docs/mvp.md) for the implementation/verification boundary.
+See [the domain setup](docs/domain.md) to publish the dashboard and API at `status.qireadr.com`.
+
+## Verification
+
 ```bash
-gh secret set KUBECONFIG_B64 --body "<base64-output>"
+cd src && go test ./... && go vet ./...
 ```
 
-## Project Structure
+From the repository root:
 
+```bash
+python3 -m unittest discover -s scripts -p 'test_*.py'
+cd frontend/dashboard && npm run build
 ```
-k8s-platform/
-├── src/                   # Go API service
-├── manifests/             # Kubernetes Deployment + Service
-├── infrastructure/        # VPS bootstrap and kubeconfig scripts
-├── .github/workflows/     # CI pipeline (test + build + push to GHCR)
-└── docs/                  # Architecture and MVP planning docs
-```
+
+The tests cover redaction, cache behavior, stale results, failure states, separation
+of CI from deployment, exact-version verification, and rollback failure reporting.
+The release tests simulate Kubernetes responses; they do not prove recovery on a
+live cluster. Record real deployment and recovery timings after a controlled drill.
+
+## Naming and deployment compatibility
+
+The product and frontend package are **CI/CD Dashboard** / `cicd-dashboard`.
+Existing Go module, GitHub remote, image repository, Kubernetes resources, and local
+checkout path retain `k8s-platform` for compatibility. These identifiers do not
+imply that the retired deployment is still running. Historical cluster
+handlers remain in source but are no longer registered on the public API.

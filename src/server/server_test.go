@@ -44,6 +44,18 @@ func TestServerRoutes(t *testing.T) {
 			path:           "/unknown",
 			wantStatusCode: http.StatusNotFound,
 		},
+		{
+			name:           "legacy cluster inventory is not public",
+			method:         http.MethodGet,
+			path:           "/api/v1/cluster",
+			wantStatusCode: http.StatusNotFound,
+		},
+		{
+			name:           "legacy deployment inventory is not public",
+			method:         http.MethodGet,
+			path:           "/api/v1/services",
+			wantStatusCode: http.StatusNotFound,
+		},
 	}
 
 	srv := newTestServer(t)

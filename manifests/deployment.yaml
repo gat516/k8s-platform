@@ -13,7 +13,10 @@ spec:
       labels:
         app: k8s-platform
     spec:
+      enableServiceLinks: false
       serviceAccountName: k8s-platform
+      # The CI/CD Dashboard reads GitHub and HTTP health, not the Kubernetes API.
+      automountServiceAccountToken: false
       containers:
         - name: k8s-platform
           # CI overrides this tag with the short git SHA on every deploy
@@ -22,10 +25,26 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            - name: APPLICATION_NAME
+              value: qireadr
+            - name: ACTIONS_REPOSITORY
+              value: gat516/book
+            - name: ACTIONS_WORKFLOW
+              value: ci.yml
+            - name: ACTIONS_BRANCH
+              value: main
+            - name: SERVICE_HEALTH_URL
+              value: https://qireadr.com/api/healthz
+            - name: ACTIONS_READ_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cicd-dashboard-github
+                  key: token
+                  optional: true
             - name: ENVIRONMENT
               value: production
             - name: CORS_ORIGINS
-              value: https://lcpatterns.dev,https://www.lcpatterns.dev,https://dashboard.lcpatterns.dev
+              value: https://status.qireadr.com
           resources:
             requests:
               memory: 32Mi

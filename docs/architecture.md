@@ -1,217 +1,111 @@
-# Architecture: Kubernetes Portfolio Platform
+# CI/CD Dashboard architecture
 
-## System Overview
+## Two independent observations
 
-The k8s-platform is a k3s single-node cluster on a VPS that serves as the backend for all portfolio services. The cluster is the backend -- not the user-facing frontend. A static React dashboard hosted on Vercel polls the cluster's API endpoints and displays real-time service status.
+The React page calls `GET /api/v1/dashboard` on the Go backend. That backend reads:
 
-## System Diagram
+1. GitHub Actions: runs and jobs for one workflow and branch.
+2. An application health endpoint: whether it responds, and its reported version.
 
-```
-                     ┌────────────────────────┐
-                     │      Cloudflare         │
-                     │    DNS + SSL (Flexible) │
-                     │                         │
-                     │  Terminates TLS,        │
-                     │  forwards HTTP to VPS   │
-                     └───────────┬─────────────┘
-                                 │ HTTP :80
-                                 ▼
-┌──────────────────────────────────────────────────────────────┐
-│                     VPS (4GB RAM / 2 vCPU)                    │
-│  ┌────────────────────────────────────────────────────────┐  │
-│  │                     k3s Cluster                         │  │
-│  │                                                         │  │
-│  │  ┌───────────────────────────────────────────────────┐  │  │
-│  │  │         Traefik Ingress (hostPort 80/443)          │  │  │
-│  │  │                                                    │  │  │
-│  │  │  api.<domain>      → k8s-platform-svc              │  │  │
-│  │  │  <lc-domain>       → lcpatterns-svc                │  │  │
-│  │  │  grafana.<domain>  → grafana-svc                   │  │  │
-│  │  └───────────────────────────────────────────────────┘  │  │
-│  │                                                         │  │
-│  │  ┌─────────────┐  ┌─────────────┐  ┌───────────────┐  │  │
-│  │  │ k8s-platform│  │ LCPatterns  │  │  Task Queue   │  │  │
-│  │  │   API       │  │             │  │               │  │  │
-│  │  │             │  │  frontend   │  │  gateway      │  │  │
-│  │  │  /health    │  │  backend    │  │  workers      │  │  │
-│  │  └─────────────┘  └─────────────┘  └───────────────┘  │  │
-│  │                                                         │  │
-│  │  ┌─────────────────────────────┐  ┌─────────────────┐  │  │
-│  │  │     Monitoring Namespace     │  │  Data Layer     │  │  │
-│  │  │  ┌───────────┐              │  │  ┌───────────┐  │  │  │
-│  │  │  │Prometheus │              │  │  │PostgreSQL │  │  │  │
-│  │  │  │+ Grafana  │              │  │  │ (Bitnami) │  │  │  │
-│  │  │  │+ Alertmgr │              │  │  │ + PVC     │  │  │  │
-│  │  │  └───────────┘              │  │  ├───────────┤  │  │  │
-│  │  └─────────────────────────────┘  │  │  Redis    │  │  │  │
-│  │                                    │  │ (Bitnami) │  │  │  │
-│  │                                    │  │ + PVC     │  │  │  │
-│  │                                    │  └───────────┘  │  │  │
-│  └────────────────────────────────────┴─────────────────┘  │  │
-│                                                              │
-└──────────────────────────────────────────────────────────────┘
-         ▲                                        ▲
-         │ SSH deploy / kubectl apply              │ fetch /health
-         │                                         │
-┌────────┴────────┐                   ┌────────────┴───────────┐
-│  GitHub Actions  │                   │   Vercel Dashboard     │
-│  CI/CD Pipeline  │                   │   (static React app)   │
-│  Build → Push →  │                   │                        │
-│  Deploy          │                   │  polls cluster APIs    │
-└─────────────────┘                   └────────────────────────┘
-```
+These observations stay separate. A passing workflow might contain only tests.
+A failed workflow might have successfully rolled back and left the service healthy.
 
-## Domain Map (planned -- domains not yet purchased/configured)
+The dashboard has no deploy buttons, database, Kubernetes credentials, or model
+provider credentials. GitHub Actions is the intended owner of ongoing releases;
+the initial installation was bootstrapped by an operator through AWS SSM. The
+dashboard itself never performs release operations.
 
-| Domain | Hosting | Purpose |
-|---|---|---|
-| `charlesgatchalian.dev` | Separate repo | Personal portfolio -- independent of this project |
-| TBD | Vercel | k8s-platform status dashboard (static React, polls cluster APIs) |
-| TBD | VPS / Traefik | LeetCode Pattern Trainer -- fully in-cluster (frontend + backend) |
-| TBD | VPS / Traefik | k8s-platform API endpoints, polled by the Vercel dashboard |
-| TBD | VPS / Traefik | Grafana (internal observability) |
+## Hosting
 
-## Component Breakdown
+`status.qireadr.com` is the live dashboard hostname. The Docker image contains
+both the compiled React assets and Go API. Cloudflare DNS points to qireadr’s
+existing AWS/k3s host; its Traefik ingress routes the page, assets, exact dashboard
+API path, and `/health` to one container. Metrics remain internal. No separate
+frontend host or cross-origin API URL is needed.
 
-### Frontend Layer
+The runtime service account has no cluster permissions or mounted token. Keep
+qireadr’s private `book` resources and shared Traefik configuration unchanged.
+See [domain setup](domain.md) for the verified initial deployment, DNS/TLS setup,
+and remaining CI deployment work. Automatic releases are still gated.
 
-| Component | Purpose | Implementation |
-|---|---|---|
-| Vercel Dashboard | Public status page showing service health | Static React app in `dashboard/`, polls `/health` endpoints every 30s |
-| LCPatterns Frontend | User-facing UI for LeetCode Pattern Trainer | Served from within the cluster by Traefik |
+## Public data contract
 
-### Infrastructure Layer
+`application`: configured display name.
 
-| Component | Purpose | Implementation |
-|---|---|---|
-| k3s | Lightweight Kubernetes distribution | Single-node install, ~600MB overhead, includes containerd |
-| Traefik | Ingress controller, reverse proxy | Bundled with k3s, hostPort 80/443 (servicelb disabled), routes via IngressRoute CRDs |
-| Cloudflare | DNS management, SSL termination | Free tier, Flexible SSL mode -- terminates TLS at edge, forwards HTTP to VPS on port 80 |
-| local-path-provisioner | Persistent storage | Bundled with k3s, provides PVCs backed by host filesystem |
+`pipeline`: source state (`available`, `stale`, `unavailable`, `not_configured`), last
+successful fetch time, refresh interval, and up to five runs. Each run contains
+its ID/number, commit SHA, GitHub URL, status/conclusion, start time, execution
+seconds, and the five stage results. No commit messages, actors, raw job names,
+logs, secrets, or upstream error bodies are forwarded.
 
-### CI/CD Layer
+`service`: `healthy`, `unhealthy`, `unknown`, or `not_configured`; check timestamp;
+optional reported version. A timeout or unreachable endpoint is unknown. A
+non-200 response is unhealthy. An HTML page with status 200 is not a health result.
 
-| Component | Purpose | Implementation |
-|---|---|---|
-| GitHub Actions | Build and deploy automation | Triggered on push to main, builds Docker images |
-| GHCR | Container image registry | Images tagged with Git SHA, pulled by k3s on deploy |
-| Helm | Release management (MVP 4+) | Each service gets a Helm chart, values.yaml stores image tag and config |
-| kubectl | Cluster access | Kubeconfig stored as GitHub Actions secret, deploy step runs kubectl/helm |
+Workflow execution time spans the earliest job start to the last job completion
+for that run attempt. It excludes time queued before jobs start. Missing job data
+means unknown duration. It is not labeled deployment time or uptime.
 
-### Observability Layer
+## Recognizing the stages
 
-| Component | Purpose | Implementation |
-|---|---|---|
-| Prometheus | Metrics collection | kube-prometheus-stack Helm chart, scrapes all services via ServiceMonitor CRDs |
-| Grafana | Dashboards and visualization | Bundled with kube-prometheus-stack, exposed via Traefik |
-| Alertmanager | Alert routing | Bundled, sends alerts on pod failures, high error rates, resource pressure |
-| kube-state-metrics | Kubernetes object metrics | Bundled, exposes pod/deployment/node status as Prometheus metrics |
+- Jobs named `build` and `deploy` map to those stages.
+- Other jobs contribute to the Checks stage (for the configured simple workflow).
+- The deploy step `Verify release` reports the functional/version verification.
+- The deploy step `Restore and verify previous release` reports verified recovery.
+- The old `Rollback on failure` step is labeled **Not verified** even if it succeeded.
+- Missing stages are **Not configured**. Skipped stages are **Not run**.
 
-### Data Layer
+These names are an explicit contract for this small project, not automatic support
+for arbitrary workflow layouts. A job-list response with more than 100 jobs is
+left unknown instead of deriving a result from incomplete data.
 
-| Component | Purpose | Implementation |
-|---|---|---|
-| PostgreSQL | Relational database | Bitnami Helm chart, PVC for persistence, ~512MB memory limit |
-| Redis | Cache, sessions, pub/sub | Bitnami Helm chart, PVC for persistence, ~128MB memory limit |
-| CronJob (backup) | Database backup | Runs pg_dump nightly, keeps N rolling backups on disk |
+## Caching and failures
 
-## Data Flow: Dashboard to Cluster
+The server caches all visitors' reads together. GitHub refreshes every minute with
+a token, or ten minutes without one. The latter caps an ordinary five-run refresh
+at roughly 36 API calls per hour. Other users of the same IP can still consume
+GitHub's shared unauthenticated allowance. Service checks cache for 30 seconds.
 
-```
-Vercel dashboard (browser)
-        │
-        │  fetch("https://<api-domain>/health")
-        ▼
-   Cloudflare (DNS + TLS termination)
-        │
-        │  HTTP :80
-        ▼
-   Traefik (matches Host rule for API subdomain)
-        │
-        ▼
-   k8s-platform pod (/health handler)
-        │
-        ▼
-   JSON response: {"status": "ok", ...}
-```
+Failed refreshes preserve prior pipeline results with a **stale** label and the
+original fetched timestamp. An initial failure shows unavailable. The browser
+also marks displayed data stale when it cannot reach the dashboard API.
 
-Browser-side polling every 30 seconds. No proxy needed -- the dashboard makes direct fetch calls to the cluster API. CORS is handled by the Go API via the `CORS_ORIGINS` environment variable (comma-separated list of allowed origins, defaults to `http://localhost:3000`).
+No credentials are sent to the health endpoint. Redirects are not followed.
+Upstream targets are fixed by server configuration, never by request parameters.
 
-## CI/CD Workflow
+## Release workflow
 
-```
-Developer pushes to main
-        │
-        ▼
-GitHub Actions triggers
-        │
-        ├── Run tests
-        ├── Build Docker image
-        ├── Tag with Git SHA (e.g., ghcr.io/gat516/k8s-platform:abc1234)
-        ├── Push to GHCR
-        │
-        ▼
-Deploy step
-        │
-        ├── Use remote kubeconfig (stored as GitHub Actions secret)
-        ├── kubectl set image / helm upgrade --set image.tag=abc1234
-        │
-        ▼
-k3s performs rolling update
-        │
-        ├── New pod starts with new image
-        ├── Readiness probe passes
-        ├── Old pod terminated
-        │
-        ▼
-Zero-downtime deployment complete
-```
+The repository workflow builds the whole dashboard. Once replacement deployment
+access is configured, its gated release job follows this sequence:
 
-## Resource Budget (4GB RAM VPS)
+1. Run Go/Python tests, frontend build, and the existing security scans.
+2. Build and publish an image identified by the source commit.
+3. Capture the prior Kubernetes deployment revision and version reported over HTTP.
+4. Apply the new release and wait for the rollout.
+5. Verify HTTP health and the expected source version.
+6. If deployment or verification fails, undo to the captured revision, wait, and
+   verify the prior version over HTTP. Failed verification keeps recovery failed.
 
-| Component | Memory Allocation |
-|---|---|
-| k3s system (kubelet, containerd, Traefik) | ~600MB |
-| PostgreSQL | ~512MB |
-| Redis | ~128MB |
-| Prometheus + Grafana + Alertmanager | ~512MB |
-| k8s-platform API service | ~64MB |
-| Task Queue (gateway + workers) | ~384MB |
-| LCPatterns (frontend + backend) | ~384MB |
-| Buffer | ~416MB |
-| **Total** | **~3000MB** |
+A failed release remains a failed workflow even when recovery succeeds. Concurrent
+pushes are serialized so a second run cannot overwrite the first run's recovery.
+An initial installation has no previous version and cannot promise rollback.
 
-This leaves headroom for pod restarts and burst usage. If memory gets tight, first targets for optimization are Prometheus retention (reduce from default 15d to 3d) and Grafana (disable unused dashboards/plugins).
+The workflow's `DEPLOY_HEALTH_URL` repository variable targets the service being
+deployed. It is separate from the dashboard's `SERVICE_HEALTH_URL`, which defaults
+to the qireadr application being observed. Deployment requires an explicit
+`https://status.qireadr.com/health` value and `DASHBOARD_DEPLOY_ENABLED=true`.
+There is no retired-host fallback. Keep the gate disabled until a scoped AWS
+SSM deployment path or appropriate private runner access is implemented and tested;
+the retained public-runner/kubeconfig job cannot reach the AWS API as configured.
 
-## Directory Structure
+## qireadr integration boundary
 
-```
-k8s-platform/
-├── infrastructure/
-│   ├── k3s-setup.sh                # k3s install + initial config
-│   ├── traefik-config.yaml         # Traefik overrides (hostPort, etc.)
-│   ├── cloudflare-dns.md           # DNS setup notes
-│   └── backup-cronjob.yaml         # PostgreSQL backup CronJob
-├── dashboard/                      # Vercel static dashboard (React)
-│   ├── package.json
-│   ├── vercel.json
-│   └── src/
-│       └── App.jsx
-├── helm-charts/
-│   ├── k8s-platform/
-│   ├── pattern-trainer/
-│   ├── task-queue/
-│   └── monitoring/
-│       ├── prom-values.yaml        # kube-prometheus-stack overrides
-│       └── dashboards/             # Custom Grafana dashboard JSON
-├── manifests/
-│   ├── deployment.yaml
-│   ├── service.yaml
-│   └── ingressroute.yaml
-├── .github/
-│   └── workflows/
-│       ├── ci.yaml                 # Build + deploy backend services
-│       └── deploy-dashboard.yaml   # Deploy dashboard to Vercel
-└── docs/
-    └── architecture.md
-```
+Keep qireadr's tests, images, and deployment workflow in `book`. This repository
+owns the read-only view and the small reusable release script. qireadr is not
+currently deployed by its checks workflow. Its production migration process is
+forward-only and must not be bypassed or replaced by this application-only script.
+
+Before enabling qireadr CD: choose one service, expose its release version in a
+health response, establish the narrowly scoped deployment credentials and route,
+and run the good-release / broken-release / verified-recovery exercise in a
+disposable environment. Only then report measured deployment/recovery times.

@@ -10,6 +10,7 @@ CLAUDE.md
 # Secrets
 *.env
 .env*
+!.env.example
 secrets/
 kubeconfig
 *.pem
@@ -22,3 +23,7 @@ k8s-platform.pub
 
 # Go
 bin/
+node_modules/
+dist/
+__pycache__/
+.pytest_cache/
