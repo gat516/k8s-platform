@@ -1,0 +1,1055 @@
+{
+  "repository": "gat516/k8s-platform",
+  "run_id": 36669744982,
+  "attempt": 3,
+  "phase": "measurement",
+  "commit": "c41f226f52c4e775e8e29c561d308f048db1de24",
+  "url": "https://github.com/gat516/k8s-platform/actions/runs/36669744982/attempts/3",
+  "run_started_at": "2026-09-30T04:47:42Z",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "id": 109744112854,
+      "name": "trial (full) / web",
+      "conclusion": "success",
+      "started_at": "2026-09-30T04:47:47Z",
+      "completed_at": "2026-09-30T04:47:57Z",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-09-30T04:47:48Z",
+          "completed_at": "2026-09-30T04:47:48Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-09-30T04:47:48Z",
+          "completed_at": "2026-09-30T04:47:50Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-09-30T04:47:50Z",
+          "completed_at": "2026-09-30T04:47:52Z"
+        },
+        {
+          "name": "Run npm ci && npm run build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-09-30T04:47:52Z",
+          "completed_at": "2026-09-30T04:47:55Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-09-30T04:47:55Z",
+          "completed_at": "2026-09-30T04:47:55Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-09-30T04:47:55Z",
+          "completed_at": "2026-09-30T04:47:55Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-09-30T04:47:55Z",
+          "completed_at": "2026-09-30T04:47:55Z"
+        }
+      ]
+    },
+    {
+      "id": 109744113002,
+      "name": "trial (full) / test",
+      "conclusion": "success",
+      "started_at": "2026-09-30T04:47:47Z",
+      "completed_at": "2026-09-30T04:48:05Z",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-09-30T04:47:48Z",
+          "completed_at": "2026-09-30T04:47:49Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-09-30T04:47:49Z",
+          "completed_at": "2026-09-30T04:47:50Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-09-30T04:47:50Z",
+          "completed_at": "2026-09-30T04:48:01Z"
+        },
+        {
+          "name": "Run cd src && go test ./...",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-09-30T04:48:01Z",
+          "completed_at": "2026-09-30T04:48:01Z"
+        },
+        {
+          "name": "Run python3 -m unittest discover -s scripts -p 'test_*.py'",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-09-30T04:48:01Z",
+          "completed_at": "2026-09-30T04:48:02Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-09-30T04:48:02Z",
+          "completed_at": "2026-09-30T04:48:02Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-09-30T04:48:02Z",
+          "completed_at": "2026-09-30T04:48:02Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-09-30T04:48:02Z",
+          "completed_at": "2026-09-30T04:48:02Z"
+        }
+      ]
+    },
+    {
+      "id": 109744113011,
+      "name": "trial (full) / scan",
+      "conclusion": "success",
+      "started_at": "2026-09-30T04:47:47Z",
+      "completed_at": "2026-09-30T04:48:18Z",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-09-30T04:47:48Z",
+          "completed_at": "2026-09-30T04:47:49Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-09-30T04:47:49Z",
+          "completed_at": "2026-09-30T04:47:51Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-09-30T04:47:51Z",
+          "completed_at": "2026-09-30T04:48:09Z"
+        },
+        {
+          "name": "Cache security scanners",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-09-30T04:48:09Z",
+          "completed_at": "2026-09-30T04:48:11Z"
+        },
+        {
+          "name": "Install security scanners",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 5,
+          "started_at": "2026-09-30T04:48:11Z",
+          "completed_at": "2026-09-30T04:48:11Z"
+        },
+        {
+          "name": "govulncheck (known-vulnerable dependencies)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-09-30T04:48:11Z",
+          "completed_at": "2026-09-30T04:48:13Z"
+        },
+        {
+          "name": "gosec (static analysis)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-09-30T04:48:13Z",
+          "completed_at": "2026-09-30T04:48:14Z"
+        },
+        {
+          "name": "Post Cache security scanners",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-09-30T04:48:14Z",
+          "completed_at": "2026-09-30T04:48:14Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-09-30T04:48:14Z",
+          "completed_at": "2026-09-30T04:48:14Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-09-30T04:48:14Z",
+          "completed_at": "2026-09-30T04:48:14Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-09-30T04:48:14Z",
+          "completed_at": "2026-09-30T04:48:14Z"
+        }
+      ]
+    },
+    {
+      "id": 109744113017,
+      "name": "trial (baseline) / scan",
+      "conclusion": "success",
+      "started_at": "2026-09-30T04:47:47Z",
+      "completed_at": "2026-09-30T04:49:38Z",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-09-30T04:47:48Z",
+          "completed_at": "2026-09-30T04:47:49Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-09-30T04:47:49Z",
+          "completed_at": "2026-09-30T04:47:51Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-09-30T04:47:51Z",
+          "completed_at": "2026-09-30T04:47:58Z"
+        },
+        {
+          "name": "Cache security scanners",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 4,
+          "started_at": "2026-09-30T04:47:58Z",
+          "completed_at": "2026-09-30T04:47:58Z"
+        },
+        {
+          "name": "Install security scanners",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-09-30T04:47:58Z",
+          "completed_at": "2026-09-30T04:48:51Z"
+        },
+        {
+          "name": "govulncheck (known-vulnerable dependencies)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-09-30T04:48:51Z",
+          "completed_at": "2026-09-30T04:48:55Z"
+        },
+        {
+          "name": "gosec (static analysis)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-09-30T04:48:55Z",
+          "completed_at": "2026-09-30T04:49:34Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-09-30T04:49:34Z",
+          "completed_at": "2026-09-30T04:49:35Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-09-30T04:49:35Z",
+          "completed_at": "2026-09-30T04:49:35Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-09-30T04:49:35Z",
+          "completed_at": "2026-09-30T04:49:35Z"
+        }
+      ]
+    },
+    {
+      "id": 109744113021,
+      "name": "trial (go-cache) / web",
+      "conclusion": "success",
+      "started_at": "2026-09-30T04:47:47Z",
+      "completed_at": "2026-09-30T04:47:59Z",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-09-30T04:47:47Z",
+          "completed_at": "2026-09-30T04:47:48Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-09-30T04:47:48Z",
+          "completed_at": "2026-09-30T04:47:49Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-09-30T04:47:49Z",
+          "completed_at": "2026-09-30T04:47:51Z"
+        },
+        {
+          "name": "Run npm ci && npm run build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-09-30T04:47:51Z",
+          "completed_at": "2026-09-30T04:47:57Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-09-30T04:47:57Z",
+          "completed_at": "2026-09-30T04:47:58Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-09-30T04:47:58Z",
+          "completed_at": "2026-09-30T04:47:58Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-09-30T04:47:58Z",
+          "completed_at": "2026-09-30T04:47:58Z"
+        }
+      ]
+    },
+    {
+      "id": 109744113071,
+      "name": "trial (go-cache) / test",
+      "conclusion": "success",
+      "started_at": "2026-09-30T04:47:47Z",
+      "completed_at": "2026-09-30T04:48:05Z",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-09-30T04:47:48Z",
+          "completed_at": "2026-09-30T04:47:49Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-09-30T04:47:49Z",
+          "completed_at": "2026-09-30T04:47:51Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-09-30T04:47:51Z",
+          "completed_at": "2026-09-30T04:48:01Z"
+        },
+        {
+          "name": "Run cd src && go test ./...",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-09-30T04:48:01Z",
+          "completed_at": "2026-09-30T04:48:02Z"
+        },
+        {
+          "name": "Run python3 -m unittest discover -s scripts -p 'test_*.py'",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-09-30T04:48:02Z",
+          "completed_at": "2026-09-30T04:48:02Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-09-30T04:48:02Z",
+          "completed_at": "2026-09-30T04:48:02Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-09-30T04:48:02Z",
+          "completed_at": "2026-09-30T04:48:02Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-09-30T04:48:02Z",
+          "completed_at": "2026-09-30T04:48:02Z"
+        }
+      ]
+    },
+    {
+      "id": 109744113114,
+      "name": "trial (baseline) / web",
+      "conclusion": "success",
+      "started_at": "2026-09-30T04:47:47Z",
+      "completed_at": "2026-09-30T04:48:02Z",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-09-30T04:47:48Z",
+          "completed_at": "2026-09-30T04:47:49Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-09-30T04:47:49Z",
+          "completed_at": "2026-09-30T04:47:51Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-09-30T04:47:51Z",
+          "completed_at": "2026-09-30T04:47:55Z"
+        },
+        {
+          "name": "Run npm ci && npm run build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-09-30T04:47:55Z",
+          "completed_at": "2026-09-30T04:48:00Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-09-30T04:48:00Z",
+          "completed_at": "2026-09-30T04:48:00Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-09-30T04:48:00Z",
+          "completed_at": "2026-09-30T04:48:00Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-09-30T04:48:00Z",
+          "completed_at": "2026-09-30T04:48:01Z"
+        }
+      ]
+    },
+    {
+      "id": 109744113197,
+      "name": "trial (baseline) / test",
+      "conclusion": "success",
+      "started_at": "2026-09-30T04:47:47Z",
+      "completed_at": "2026-09-30T04:48:52Z",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-09-30T04:47:48Z",
+          "completed_at": "2026-09-30T04:47:49Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-09-30T04:47:49Z",
+          "completed_at": "2026-09-30T04:47:51Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-09-30T04:47:51Z",
+          "completed_at": "2026-09-30T04:48:00Z"
+        },
+        {
+          "name": "Run cd src && go test ./...",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-09-30T04:48:00Z",
+          "completed_at": "2026-09-30T04:48:48Z"
+        },
+        {
+          "name": "Run python3 -m unittest discover -s scripts -p 'test_*.py'",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-09-30T04:48:48Z",
+          "completed_at": "2026-09-30T04:48:48Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-09-30T04:48:48Z",
+          "completed_at": "2026-09-30T04:48:48Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-09-30T04:48:48Z",
+          "completed_at": "2026-09-30T04:48:48Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-09-30T04:48:49Z",
+          "completed_at": "2026-09-30T04:48:49Z"
+        }
+      ]
+    },
+    {
+      "id": 109744113205,
+      "name": "trial (go-cache) / scan",
+      "conclusion": "success",
+      "started_at": "2026-09-30T04:47:48Z",
+      "completed_at": "2026-09-30T04:48:20Z",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-09-30T04:47:49Z",
+          "completed_at": "2026-09-30T04:47:50Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-09-30T04:47:50Z",
+          "completed_at": "2026-09-30T04:47:52Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-09-30T04:47:52Z",
+          "completed_at": "2026-09-30T04:48:11Z"
+        },
+        {
+          "name": "Cache security scanners",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-09-30T04:48:11Z",
+          "completed_at": "2026-09-30T04:48:12Z"
+        },
+        {
+          "name": "Install security scanners",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 5,
+          "started_at": "2026-09-30T04:48:12Z",
+          "completed_at": "2026-09-30T04:48:12Z"
+        },
+        {
+          "name": "govulncheck (known-vulnerable dependencies)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-09-30T04:48:12Z",
+          "completed_at": "2026-09-30T04:48:16Z"
+        },
+        {
+          "name": "gosec (static analysis)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-09-30T04:48:16Z",
+          "completed_at": "2026-09-30T04:48:16Z"
+        },
+        {
+          "name": "Post Cache security scanners",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-09-30T04:48:16Z",
+          "completed_at": "2026-09-30T04:48:16Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-09-30T04:48:16Z",
+          "completed_at": "2026-09-30T04:48:17Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-09-30T04:48:17Z",
+          "completed_at": "2026-09-30T04:48:17Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-09-30T04:48:17Z",
+          "completed_at": "2026-09-30T04:48:17Z"
+        }
+      ]
+    },
+    {
+      "id": 109744238047,
+      "name": "trial (full) / build",
+      "conclusion": "success",
+      "started_at": "2026-09-30T04:48:21Z",
+      "completed_at": "2026-09-30T04:50:08Z",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-09-30T04:48:21Z",
+          "completed_at": "2026-09-30T04:48:22Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-09-30T04:48:22Z",
+          "completed_at": "2026-09-30T04:48:23Z"
+        },
+        {
+          "name": "Set short SHA",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-09-30T04:48:23Z",
+          "completed_at": "2026-09-30T04:48:24Z"
+        },
+        {
+          "name": "Log in to GHCR",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-09-30T04:48:24Z",
+          "completed_at": "2026-09-30T04:48:24Z"
+        },
+        {
+          "name": "Set up Docker Buildx",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-09-30T04:48:24Z",
+          "completed_at": "2026-09-30T04:48:30Z"
+        },
+        {
+          "name": "Build and push",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-09-30T04:48:30Z",
+          "completed_at": "2026-09-30T04:49:59Z"
+        },
+        {
+          "name": "Post Build and push",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-09-30T04:49:59Z",
+          "completed_at": "2026-09-30T04:50:00Z"
+        },
+        {
+          "name": "Post Set up Docker Buildx",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-09-30T04:50:00Z",
+          "completed_at": "2026-09-30T04:50:05Z"
+        },
+        {
+          "name": "Post Log in to GHCR",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-09-30T04:50:05Z",
+          "completed_at": "2026-09-30T04:50:06Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-09-30T04:50:06Z",
+          "completed_at": "2026-09-30T04:50:06Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-09-30T04:50:06Z",
+          "completed_at": "2026-09-30T04:50:06Z"
+        }
+      ]
+    },
+    {
+      "id": 109744246847,
+      "name": "trial (go-cache) / build",
+      "conclusion": "success",
+      "started_at": "2026-09-30T04:48:22Z",
+      "completed_at": "2026-09-30T04:49:39Z",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-09-30T04:48:23Z",
+          "completed_at": "2026-09-30T04:48:25Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-09-30T04:48:25Z",
+          "completed_at": "2026-09-30T04:48:27Z"
+        },
+        {
+          "name": "Set short SHA",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-09-30T04:48:27Z",
+          "completed_at": "2026-09-30T04:48:27Z"
+        },
+        {
+          "name": "Log in to GHCR",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-09-30T04:48:27Z",
+          "completed_at": "2026-09-30T04:48:27Z"
+        },
+        {
+          "name": "Set up Docker Buildx",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 5,
+          "started_at": "2026-09-30T04:48:27Z",
+          "completed_at": "2026-09-30T04:48:27Z"
+        },
+        {
+          "name": "Build and push",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-09-30T04:48:27Z",
+          "completed_at": "2026-09-30T04:49:37Z"
+        },
+        {
+          "name": "Post Build and push",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-09-30T04:49:37Z",
+          "completed_at": "2026-09-30T04:49:38Z"
+        },
+        {
+          "name": "Post Log in to GHCR",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-09-30T04:49:38Z",
+          "completed_at": "2026-09-30T04:49:38Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-09-30T04:49:38Z",
+          "completed_at": "2026-09-30T04:49:38Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-09-30T04:49:38Z",
+          "completed_at": "2026-09-30T04:49:38Z"
+        }
+      ]
+    },
+    {
+      "id": 109744548719,
+      "name": "trial (baseline) / build",
+      "conclusion": "success",
+      "started_at": "2026-09-30T04:49:41Z",
+      "completed_at": "2026-09-30T04:51:09Z",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-09-30T04:49:42Z",
+          "completed_at": "2026-09-30T04:49:45Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-09-30T04:49:45Z",
+          "completed_at": "2026-09-30T04:49:46Z"
+        },
+        {
+          "name": "Set short SHA",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-09-30T04:49:46Z",
+          "completed_at": "2026-09-30T04:49:46Z"
+        },
+        {
+          "name": "Log in to GHCR",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-09-30T04:49:46Z",
+          "completed_at": "2026-09-30T04:49:48Z"
+        },
+        {
+          "name": "Set up Docker Buildx",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 5,
+          "started_at": "2026-09-30T04:49:48Z",
+          "completed_at": "2026-09-30T04:49:48Z"
+        },
+        {
+          "name": "Build and push",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-09-30T04:49:48Z",
+          "completed_at": "2026-09-30T04:51:04Z"
+        },
+        {
+          "name": "Post Build and push",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-09-30T04:51:04Z",
+          "completed_at": "2026-09-30T04:51:06Z"
+        },
+        {
+          "name": "Post Log in to GHCR",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-09-30T04:51:06Z",
+          "completed_at": "2026-09-30T04:51:06Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-09-30T04:51:06Z",
+          "completed_at": "2026-09-30T04:51:06Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-09-30T04:51:06Z",
+          "completed_at": "2026-09-30T04:51:06Z"
+        }
+      ]
+    }
+  ],
+  "variants": {
+    "baseline": {
+      "pipeline_seconds": 202.0,
+      "from_run_start_seconds": 207.0,
+      "runner_seconds": 279.0,
+      "scan_seconds": 111.0,
+      "scanner_install_skipped": false,
+      "web_seconds": 15.0,
+      "test_seconds": 65.0,
+      "build_seconds": 88.0,
+      "build_push_seconds": 76.0
+    },
+    "go-cache": {
+      "pipeline_seconds": 112.0,
+      "from_run_start_seconds": 117.0,
+      "runner_seconds": 139.0,
+      "web_seconds": 12.0,
+      "test_seconds": 18.0,
+      "scan_seconds": 32.0,
+      "scanner_install_skipped": true,
+      "build_seconds": 77.0,
+      "build_push_seconds": 70.0
+    },
+    "full": {
+      "pipeline_seconds": 141.0,
+      "from_run_start_seconds": 146.0,
+      "runner_seconds": 166.0,
+      "web_seconds": 10.0,
+      "test_seconds": 18.0,
+      "scan_seconds": 31.0,
+      "scanner_install_skipped": true,
+      "build_seconds": 107.0,
+      "build_push_seconds": 89.0
+    }
+  }
+}

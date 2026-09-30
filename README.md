@@ -130,6 +130,9 @@ of CI from deployment, exact-version verification, and rollback failure reportin
 The release tests simulate Kubernetes responses; they do not prove recovery on a
 live cluster. Record real deployment and recovery timings after a controlled drill.
 
+See the [CI cache experiment](docs/ci-cache-benchmark.md) for the repeatable
+comparison of Go/scanner caches and Docker layer reuse, including raw run timings.
+
 ## Naming and deployment compatibility
 
 The product and frontend package are **CI/CD Dashboard** / `cicd-dashboard`.
