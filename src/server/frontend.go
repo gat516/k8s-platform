@@ -1,26 +1,44 @@
 package server
 
 import (
+	"bytes"
 	"io/fs"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
-// dashboardFiles exposes the one-page UI and its compiled assets. Unknown API
-// paths remain 404s; directory listings and arbitrary files are never served.
+// Load the compiled UI once. Requests select a known asset; they never open a
+// filesystem path. Symlinks, directories and files outside assets are excluded.
 func dashboardFiles(dir string) http.Handler {
+	type asset struct {
+		body     []byte
+		modified time.Time
+	}
+	assets := make(map[string]asset)
 	files := os.DirFS(dir)
+	_ = fs.WalkDir(files, ".", func(name string, entry fs.DirEntry, err error) error {
+		if err != nil || !entry.Type().IsRegular() || (name != "index.html" && !strings.HasPrefix(name, "assets/")) {
+			return nil
+		}
+		info, err := entry.Info()
+		if err != nil {
+			return nil
+		}
+		body, err := fs.ReadFile(files, name)
+		if err == nil {
+			assets[name] = asset{body, info.ModTime()}
+		}
+		return nil
+	})
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		name := strings.TrimPrefix(r.URL.Path, "/")
 		if name == "" {
 			name = "index.html"
-		} else if !strings.HasPrefix(name, "assets/") || !fs.ValidPath(name) {
-			http.NotFound(w, r)
-			return
 		}
-		info, err := fs.Stat(files, name)
-		if err != nil || !info.Mode().IsRegular() {
+		file, ok := assets[name]
+		if !ok {
 			http.NotFound(w, r)
 			return
 		}
@@ -30,6 +48,6 @@ func dashboardFiles(dir string) http.Handler {
 			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 		}
 		w.Header().Set("X-Content-Type-Options", "nosniff")
-		http.ServeFileFS(w, r, files, name)
+		http.ServeContent(w, r, name, file.modified, bytes.NewReader(file.body))
 	})
 }

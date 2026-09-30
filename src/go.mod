@@ -1,6 +1,6 @@
 module github.com/gat516/k8s-platform
 
-go 1.25.7
+go 1.25.13
 
 require (
 	github.com/prometheus/client_golang v1.23.2

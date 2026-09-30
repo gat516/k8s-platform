@@ -12,7 +12,7 @@ RUN npm run build
 # ─── Stage 1: Build ───────────────────────────────────────────────────────────
 # Use the official Go image as the build environment. This stage is discarded
 # after compilation — it never appears in the final image.
-FROM golang:1.25 AS builder
+FROM golang:1.25.13 AS builder
 
 WORKDIR /build
 

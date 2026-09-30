@@ -63,3 +63,25 @@ func TestDashboardFiles(t *testing.T) {
 		})
 	}
 }
+
+func TestDashboardFilesCannotReadOutsideAssets(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.Mkdir(filepath.Join(dir, "assets"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	private := filepath.Join(dir, "private.txt")
+	if err := os.WriteFile(private, []byte("private"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(private, filepath.Join(dir, "assets", "link.txt")); err != nil {
+		t.Fatal(err)
+	}
+	handler := dashboardFiles(dir)
+	for _, path := range []string{"/private.txt", "/assets/../private.txt", "/assets/%2e%2e/private.txt", "/assets/link.txt", "/assets/"} {
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))
+		if rec.Code != 404 || strings.Contains(rec.Body.String(), "private") {
+			t.Fatalf("path %s: %d %q", path, rec.Code, rec.Body.String())
+		}
+	}
+}
