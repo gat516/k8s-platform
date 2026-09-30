@@ -5,6 +5,44 @@ workflow searched the repository root for `go.sum`, but this project keeps it in
 `src/`. The scan job also rebuilt its scanner executables on every run. Docker
 layers were not exported to a cache shared by later runners.
 
+## Result
+
+Retain Go/scanner caching. Across five measured comparisons, median pipeline
+duration fell **53.3%**, from **4m06s to 1m55s**.
+All fifteen measured variant pipelines passed every check and published an image.
+
+| Median, five samples | Baseline | Go/scanner caches (selected) | Plus Docker cache |
+| --- | ---: | ---: | ---: |
+| Pipeline duration | 4m06s | 1m55s | 2m21s |
+| Security scan job | 2m15s | 32s | 31s |
+| Go/Python test job | 1m05s | 20s | 19s |
+| Image build/publish job | 1m28s | 1m19s | 1m47s |
+| Total runner time | 5m19s | 2m19s | 2m46s |
+
+The Docker-cache variant took 26s longer than Go/scanner caching
+alone at the median, so the production workflow retains its original Docker
+build configuration. The experiment did confirm cached Go-module and frontend
+layers; that reuse did not reduce total build time under this Buildx configuration.
+
+The single cache-population attempt took 4m01s for the baseline, 4m11s for Go/scanner
+caching, and 4m57s with Docker caching. Those are reported separately and excluded
+from the warm-cache medians. Do not claim these gains for a first run with empty
+caches or for deployment/recovery time.
+
+| Measured attempt | Baseline | Go/scanner caches | Plus Docker cache |
+| --- | ---: | ---: | ---: |
+| [2](https://github.com/gat516/k8s-platform/actions/runs/36669744982/attempts/2) | 3m24s | 1m57s | 2m28s |
+| [3](https://github.com/gat516/k8s-platform/actions/runs/36669744982/attempts/3) | 3m22s | 1m52s | 2m21s |
+| [4](https://github.com/gat516/k8s-platform/actions/runs/36669744982/attempts/4) | 4m12s | 1m56s | 2m18s |
+| [5](https://github.com/gat516/k8s-platform/actions/runs/36669744982/attempts/5) | 4m06s | 1m50s | 2m17s |
+| [6](https://github.com/gat516/k8s-platform/actions/runs/36669744982/attempts/6) | 4m21s | 1m55s | 2m23s |
+
+Resume wording, with the benchmark scope made explicit:
+
+```latex
+\resumeItem{Reduced median CI runtime 53\%, from 4m06s to 1m55s, across five controlled trials by repairing Go caching and reusing pinned security scanner binaries}
+```
+
 ## Changes under test
 
 - Point the Go test cache at `src/go.sum`.
