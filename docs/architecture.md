@@ -102,7 +102,8 @@ the retained public-runner/kubeconfig job cannot reach the AWS API as configured
 
 Keep qireadr's tests, images, and deployment workflow in `book`. This repository
 owns the read-only view and the small reusable release script. qireadr is not
-currently deployed by its checks workflow. Its production migration process is
+currently deployed by its checks workflow. Its reader API health response now includes its deployed source version, and
+`book/main` push runs populate the dashboard. Its production migration process is
 forward-only and must not be bypassed or replaced by this application-only script.
 
 Before enabling qireadr CD: choose one service, expose its release version in a

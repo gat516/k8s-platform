@@ -23,21 +23,22 @@ GitHub Actions runs the pipeline; this dashboard explains its results.
 - The public API returns a fixed set of fields. It does not return commit messages,
   actor identities, logs, tokens, private health URLs, or cluster inventory.
 
-## What is not connected yet
+## Release status
 
-The default source is `gat516/book`, workflow `ci.yml`, branch `main`. Confirm that
-these match the GitHub repository you intend to monitor. That workflow currently
+The default source is `gat516/book`, workflow `ci.yml`, branch `main`. The reviewed
+application changes are now on `main`, and real push runs are visible. That workflow
 runs checks and builds; it does not deploy qireadr. Deploy/verify/rollback therefore
 show **Not configured**, rather than invented successful releases.
 
-qireadr's health endpoint currently need not report a version. Until it does, the
-page says **Not reported**. Do not infer a running version from a Git commit or a
-successful workflow run.
+qireadr's health endpoint reports the running reader API version (`61cc88c` at
+this release). Other services may use different versions. Do not infer their
+running versions from a Git commit or a successful workflow run.
 
 The dashboard is live at **https://status.qireadr.com** on qireadr's existing
 AWS/k3s node, behind Cloudflare. Initial deployment and HTTPS were verified on
-September 29, 2026, using source snapshot `worktree-d0533b2b5190`. GitHub is
-reachable but currently has no matching push runs for the configured source.
+September 29, 2026. The current release is committed source `ce467b2`, with a
+plain service summary, workflow stages and run history. GitHub is reachable and
+reports the `book/main` push runs.
 Automatic deployment remains gated until CI access is connected. A controlled
 recovery drill is still needed before claiming measured recovery performance.
 

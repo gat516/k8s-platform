@@ -17,6 +17,25 @@ API hostname, Vercel project, database, or AWS stack is needed.
 
 ## Current deployment (September 29, 2026)
 
+**Live:** https://status.qireadr.com, release `ce467b2` from committed `main`.
+The UI now uses plain labels, a compact service summary, workflow stages and recent
+runs. The source build, Go/Python tests, frontend build, dependency/security scans
+and GitHub workflow passed. Static assets are loaded from a fixed asset map;
+requests cannot choose filesystem paths. The Go builder is pinned to 1.25.13.
+
+The image was imported through the existing private S3/SSM path and applied only
+to `default/k8s-platform`. Exact-version HTTP verification passed. The node retains
+`/root/status-dashboard/releases/ce467b2/`, including the imported image, prior
+deployment, previous image and health verification. GitHub Actions also published
+`ghcr.io/gat516/k8s-platform:ce467b2`; the node uses its imported image with
+`IfNotPresent`. Automatic deployment remains gated.
+
+qireadr's reader API now reports `61cc88c`. The dashboard independently reads that
+version and the real `book/main` push runs. A successful workflow does not mean
+that GitHub deployed the app. No browser was connected for a visual sign-off.
+
+## Initial deployment (September 29, 2026)
+
 **Live:** https://status.qireadr.com, release `worktree-d0533b2b5190`. The
 source-snapshot tag identifies the reviewed, still-uncommitted build inputs.
 The initial release was applied through AWS SSM to instance
